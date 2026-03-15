@@ -57,6 +57,7 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ArrowDown } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
