@@ -1,0 +1,68 @@
+<view class="container">
+  <view class="page-title">确认订单</view>
+  <view class="tip card">暂不支持线上支付。提交后请电话或扫码联系店家，确认品相后线下付款。</view>
+
+  <view class="card" wx:if="{{shopContact}}">
+    <view class="section-title">商家信息</view>
+    <view class="line" wx:if="{{shopContact.name}}">店家 {{shopContact.name}}</view>
+    <view class="line" wx:if="{{shopContact.phone}}">电话 {{shopContact.phone}}</view>
+    <view class="line" wx:if="{{shopContact.address}}">地址 {{shopContact.address}}</view>
+    <view class="line" wx:if="{{shopContact.wechat}}">微信 {{shopContact.wechat}}</view>
+    <image
+      wx:if="{{shopContact.wechatQrcodeUrl}}"
+      class="qrcode"
+      src="{{shopContact.wechatQrcodeUrl}}"
+      mode="aspectFit"
+      show-menu-by-longpress
+    />
+    <view class="muted tip-text" wx:if="{{shopContact.tip}}">{{shopContact.tip}}</view>
+  </view>
+
+  <view wx:if="{{!items.length && !loading}}" class="empty card">
+    没有待结算的商品
+    <button class="btn-primary go" bindtap="goBooks">去选书</button>
+  </view>
+
+  <block wx:elif="{{items.length}}">
+    <view class="card">
+      <view class="section-title">商品清单</view>
+      <view class="goods" wx:for="{{items}}" wx:key="bookId">
+        <image class="cover" src="{{item.coverUrl}}" mode="aspectFill" />
+        <view class="body">
+          <view class="title">{{item.bookTitle}}</view>
+          <view class="muted">{{item.bookAuthor}}</view>
+          <view class="row">
+            <text class="price">¥{{item.bookPrice}}</text>
+            <text class="muted">x{{item.quantity}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="total price">合计：¥{{totalAmount}}</view>
+    </view>
+
+    <view class="card">
+      <view class="section-title">联系信息</view>
+      <view class="form-item">
+        <text class="label">联系人</text>
+        <input class="input" placeholder="您的姓名" value="{{form.receiverName}}" data-key="receiverName" bindinput="onInput" />
+      </view>
+      <view class="form-item">
+        <text class="label">联系电话</text>
+        <input class="input" type="number" placeholder="手机号" value="{{form.receiverPhone}}" data-key="receiverPhone" bindinput="onInput" />
+      </view>
+      <view class="form-item">
+        <text class="label">收货地址</text>
+        <textarea class="textarea" placeholder="选填，也可下单后与店家确认" value="{{form.receiverAddress}}" data-key="receiverAddress" bindinput="onInput" />
+      </view>
+      <view class="form-item">
+        <text class="label">备注</text>
+        <textarea class="textarea" placeholder="选填" value="{{form.remark}}" data-key="remark" bindinput="onInput" />
+      </view>
+    </view>
+
+    <view class="actions">
+      <button class="btn-ghost action" bindtap="goBack">返回</button>
+      <button class="btn-primary action" loading="{{submitting}}" bindtap="submitOrder">提交订单</button>
+    </view>
+  </block>
+</view>

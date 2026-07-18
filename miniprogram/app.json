@@ -1,0 +1,46 @@
+{
+  "pages": [
+    "pages/books/books",
+    "pages/book-detail/book-detail",
+    "pages/cart/cart",
+    "pages/checkout/checkout",
+    "pages/orders/orders",
+    "pages/order-success/order-success"
+  ],
+  "window": {
+    "navigationBarTitleText": "三定圆梦书店",
+    "navigationBarBackgroundColor": "#eef1f4",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#e4e8ec",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#586374",
+    "selectedColor": "#3b6fd4",
+    "backgroundColor": "#eef1f4",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/books/books",
+        "text": "选书",
+        "iconPath": "assets/tab-books.png",
+        "selectedIconPath": "assets/tab-books-active.png"
+      },
+      {
+        "pagePath": "pages/cart/cart",
+        "text": "购物车",
+        "iconPath": "assets/tab-cart.png",
+        "selectedIconPath": "assets/tab-cart-active.png"
+      },
+      {
+        "pagePath": "pages/orders/orders",
+        "text": "我的订单",
+        "iconPath": "assets/tab-orders.png",
+        "selectedIconPath": "assets/tab-orders-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

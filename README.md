@@ -5,7 +5,8 @@
 ## 项目介绍
 
 本项目是一个完整的二手书交易平台，包含：
-- **用户前端**：图书浏览、搜索、购买、订单管理等功能
+- **用户前端（Web）**：图书浏览、搜索、购买、订单管理等功能
+- **用户端小程序**：与 Web 用户端并行，目录见 `miniprogram/`
 - **管理后台**：图书管理、用户管理、订单管理等功能
 - **后端API**：基于Spring Boot的RESTful API服务
 
@@ -34,10 +35,14 @@ book_shop/
 │   ├── src/main/java/      # Java源代码
 │   ├── src/main/resources/ # 配置文件
 │   └── pom.xml             # Maven配置
-├── frontend-user/          # 用户前端项目
+├── frontend-user/          # 用户前端项目（Web）
 │   ├── src/                # Vue源代码
 │   ├── public/             # 静态资源
 │   └── package.json        # 依赖配置
+├── miniprogram/            # 用户端微信小程序（原生）
+│   ├── pages/              # 选书/购物车/下单/订单
+│   ├── utils/              # 请求与本地购物车
+│   └── README.md           # 小程序运行说明
 ├── frontend-admin/         # 管理后台项目（待开发）
 ├── docs/                   # 文档
 │   └── database.sql        # 数据库脚本

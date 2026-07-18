@@ -1,0 +1,41 @@
+<view class="container">
+  <view class="page-title">购物车</view>
+  <view class="page-desc">共 {{itemCount}} 件 · 浏览下单无需登录</view>
+
+  <view wx:if="{{!items.length}}" class="empty card">
+    <view>购物车空空如也</view>
+    <button class="btn-primary go" bindtap="goBooks">去选书</button>
+  </view>
+
+  <block wx:else>
+    <view class="card item" wx:for="{{items}}" wx:key="id">
+      <checkbox checked="{{item.selected}}" data-id="{{item.id}}" bindtap="toggleSelect" color="#3b6fd4" style="transform:scale(0.9)" />
+      <image class="cover" src="{{item.coverUrl}}" mode="aspectFill" data-id="{{item.bookId}}" bindtap="goDetail" />
+      <view class="body">
+        <view class="title" data-id="{{item.bookId}}" bindtap="goDetail">{{item.bookTitle}}</view>
+        <view class="muted">{{item.bookAuthor}}</view>
+        <view class="row">
+          <text class="price">¥{{item.bookPrice}}</text>
+          <view class="qty-row">
+            <button class="qty-btn" data-id="{{item.id}}" data-delta="-1" bindtap="changeQty">-</button>
+            <text class="qty">{{item.quantity}}</text>
+            <button class="qty-btn" data-id="{{item.id}}" data-delta="1" bindtap="changeQty">+</button>
+          </view>
+        </view>
+        <view class="remove muted" data-id="{{item.id}}" bindtap="removeItem">删除</view>
+      </view>
+    </view>
+
+    <view class="footer card">
+      <label class="select-all" bindtap="toggleSelectAll">
+        <checkbox checked="{{selectAll}}" color="#3b6fd4" />
+        <text>全选</text>
+      </label>
+      <view class="sum">
+        <view class="muted">已选 {{selectedCount}} 件</view>
+        <view class="price">合计 ¥{{selectedAmount}}</view>
+      </view>
+      <button class="btn-primary checkout" disabled="{{selectedCount === 0}}" bindtap="checkout">去下单</button>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,67 @@
+<view class="container">
+  <view class="hero">
+    <image class="logo" src="/assets/logo.jpg" mode="aspectFill" />
+    <view class="hero-text">
+      <view class="page-title">三定圆梦书店</view>
+      <view class="page-desc">按分类浏览，或搜索书名、作者</view>
+    </view>
+  </view>
+
+  <view class="toolbar">
+    <input
+      class="search"
+      placeholder="搜索书名、作者或出版社"
+      value="{{keyword}}"
+      confirm-type="search"
+      bindinput="onKeywordInput"
+      bindconfirm="onSearch"
+    />
+    <picker mode="selector" range="{{sortLabels}}" value="{{sortIndex}}" bindchange="onSortChange">
+      <view class="sort">{{sortLabels[sortIndex]}}</view>
+    </picker>
+  </view>
+
+  <scroll-view scroll-x class="category-bar" enable-flex>
+    <view
+      class="chip {{selectedCategory === '' ? 'active' : ''}}"
+      data-id=""
+      bindtap="onSelectCategory"
+    >全部</view>
+    <view
+      wx:for="{{categories}}"
+      wx:key="id"
+      class="chip {{selectedCategory == item.id ? 'active' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="onSelectCategory"
+    >{{item.name}}</view>
+  </scroll-view>
+
+  <view wx:if="{{loading}}" class="empty">加载中...</view>
+  <view wx:elif="{{!books.length}}" class="empty">暂无符合条件的图书</view>
+
+  <view wx:else class="book-grid">
+    <view
+      class="book-item"
+      wx:for="{{books}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="goDetail"
+    >
+      <image class="cover" src="{{item.coverUrl}}" mode="aspectFill" />
+      <view class="info">
+        <view class="title">{{item.title}}</view>
+        <view class="author">{{item.author}}</view>
+        <view class="meta">
+          <text class="price">¥{{item.price}}</text>
+          <text class="muted">余 {{item.stock}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="pager" wx:if="{{total > 0}}">
+    <button class="btn-ghost pager-btn" disabled="{{page <= 1}}" bindtap="prevPage">上一页</button>
+    <text class="pager-text">{{page}} / {{totalPages}}</text>
+    <button class="btn-ghost pager-btn" disabled="{{page >= totalPages}}" bindtap="nextPage">下一页</button>
+  </view>
+</view>

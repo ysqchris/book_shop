@@ -1,0 +1,51 @@
+.head {
+  text-align: center;
+}
+
+.ok {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--accent-deep);
+  margin-bottom: 8rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+}
+
+.line {
+  margin-bottom: 10rpx;
+  font-size: 28rpx;
+}
+
+.link {
+  color: var(--accent);
+}
+
+.qrcode {
+  width: 280rpx;
+  height: 280rpx;
+  margin: 16rpx auto 0;
+  display: block;
+  border-radius: 12rpx;
+  border: 1rpx solid var(--border);
+  background: var(--surface-raised);
+}
+
+.tip {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.action {
+  margin: 0;
+}

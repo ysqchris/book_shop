@@ -1,0 +1,44 @@
+<view class="container">
+  <view class="page-title">我的订单</view>
+  <view class="page-desc">下单后请联系店家完成线下付款。本机可查看近期订单。</view>
+
+  <view class="card" wx:if="{{shopContact}}">
+    <view class="section-title">店家联系方式</view>
+    <view class="line" wx:if="{{shopContact.name}}">店家 {{shopContact.name}}</view>
+    <view class="line" wx:if="{{shopContact.phone}}">
+      电话
+      <text class="link" data-phone="{{shopContact.phone}}" bindtap="callPhone"> {{shopContact.phone}}</text>
+    </view>
+    <view class="line" wx:if="{{shopContact.address}}">地址 {{shopContact.address}}</view>
+    <view class="line" wx:if="{{shopContact.wechat}}">微信 {{shopContact.wechat}}</view>
+    <image
+      wx:if="{{shopContact.wechatQrcodeUrl}}"
+      class="qrcode"
+      src="{{shopContact.wechatQrcodeUrl}}"
+      mode="aspectFit"
+      show-menu-by-longpress
+    />
+  </view>
+
+  <view wx:if="{{loading}}" class="empty">加载中...</view>
+  <view wx:elif="{{!details.length}}" class="empty card">
+    暂无订单
+    <button class="btn-primary go" bindtap="goBooks">去逛逛</button>
+  </view>
+
+  <view class="card order" wx:for="{{details}}" wx:key="orderId">
+    <view class="row">
+      <text class="no">订单号 {{item.order.orderNo}}</text>
+      <text class="status">{{item.statusText}}</text>
+    </view>
+    <view class="row muted">
+      <text>应付 ¥{{item.payAmount}}</text>
+      <text>{{item.createTime}}</text>
+    </view>
+    <view class="goods" wx:for="{{item.items}}" wx:for-item="g" wx:key="id">
+      <text class="g-title">{{g.bookTitle}}</text>
+      <text class="muted">¥{{g.bookPrice}} × {{g.quantity}}</text>
+    </view>
+    <view class="detail-link" data-id="{{item.order.id}}" bindtap="goSuccess">查看详情 / 联系店家</view>
+  </view>
+</view>

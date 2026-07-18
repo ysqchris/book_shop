@@ -1,0 +1,40 @@
+<view class="container" wx:if="{{book}}">
+  <view class="card top">
+    <image class="cover" src="{{coverUrl}}" mode="aspectFill" />
+    <view class="right">
+      <view class="title">{{book.title}}</view>
+      <view class="line muted">作者 {{book.author}}</view>
+      <view class="line muted" wx:if="{{book.publisher}}">出版社 {{book.publisher}}</view>
+      <view class="price-row">
+        <text class="price">¥{{book.price}}</text>
+        <text class="origin" wx:if="{{book.originalPrice}}">原价 ¥{{book.originalPrice}}</text>
+      </view>
+      <view class="stock muted">库存 {{book.stock}} 本</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">购买数量</view>
+    <view class="qty-row">
+      <button class="qty-btn" bindtap="decQty">-</button>
+      <text class="qty">{{quantity}}</text>
+      <button class="qty-btn" bindtap="incQty">+</button>
+    </view>
+  </view>
+
+  <view class="card" wx:if="{{book.description}}">
+    <view class="section-title">内容简介</view>
+    <view class="desc">{{book.description}}</view>
+  </view>
+
+  <view class="card tip">
+    提交订单后联系店家线下付款，可电话或扫码加微信确认品相与发货。
+  </view>
+
+  <view class="actions">
+    <button class="btn-ghost action" bindtap="addCart" disabled="{{book.stock === 0}}">加入购物车</button>
+    <button class="btn-primary action" bindtap="buyNow" disabled="{{book.stock === 0}}">立即购买</button>
+  </view>
+</view>
+
+<view class="empty" wx:elif="{{!loading}}">图书不存在或已下架</view>
