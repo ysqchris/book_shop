@@ -2,9 +2,9 @@
   <el-container class="admin-layout">
     <el-aside width="220px" class="sidebar">
       <div class="brand">
-        <span class="brand-mark">三</span>
+        <img class="brand-logo" src="/shop-sign.png" alt="三定圆梦书店" />
         <div>
-          <strong>三定圆梦</strong>
+          <strong>三定圆梦书店</strong>
           <p>管理后台</p>
         </div>
       </div>
@@ -100,14 +100,15 @@ const handleLogout = async () => {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.brand-mark {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  background: #2f80ed;
-  font-weight: 700;
+.brand-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  object-position: center 28%;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #f5d84a;
+  flex-shrink: 0;
 }
 
 .brand strong {

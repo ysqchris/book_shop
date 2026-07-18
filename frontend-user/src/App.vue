@@ -3,6 +3,7 @@
     <header class="header">
       <div class="header-content">
         <div class="logo" @click="$router.push('/books')">
+          <img class="logo-img" src="/shop-sign.png" alt="三定圆梦书店" />
           <h1>三定圆梦书店</h1>
         </div>
         <nav class="nav-links">
@@ -69,7 +70,23 @@ const isBooks = computed(() => route.path === '/books' || route.path.startsWith(
 }
 
 .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   cursor: pointer;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.logo-img {
+  height: 48px;
+  width: 108px;
+  object-fit: cover;
+  object-position: center 28%;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #f5d84a;
+  display: block;
   flex-shrink: 0;
 }
 
@@ -178,6 +195,11 @@ const isBooks = computed(() => route.path === '/books' || route.path.startsWith(
 
   .logo h1 {
     font-size: 15px;
+  }
+
+  .logo-img {
+    height: 40px;
+    width: 90px;
   }
 
   .nav-links {
