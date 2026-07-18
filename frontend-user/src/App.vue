@@ -14,6 +14,7 @@
             <span v-if="cartStore.itemCount" class="cart-badge">{{ cartStore.itemCount }}</span>
           </router-link>
           <router-link to="/orders" class="nav-link" active-class="active">我的订单</router-link>
+          <router-link to="/consult" class="nav-link" active-class="active">找书咨询</router-link>
         </nav>
 
         <!-- 移动端：选书页右上角视图切换 -->
@@ -61,6 +62,10 @@
         <span class="tab-icon">📋</span>
         <span class="tab-label">我的订单</span>
       </router-link>
+      <router-link to="/consult" class="tab-item" :class="{ active: isConsult }">
+        <span class="tab-icon">💬</span>
+        <span class="tab-label">找书咨询</span>
+      </router-link>
     </nav>
   </div>
 </template>
@@ -80,6 +85,7 @@ const year = new Date().getFullYear()
 const isBooks = computed(() => route.path === '/books' || route.path.startsWith('/book/'))
 const isCart = computed(() => route.path === '/cart')
 const isOrders = computed(() => route.path === '/orders')
+const isConsult = computed(() => route.path === '/consult')
 </script>
 
 <style scoped>

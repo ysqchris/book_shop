@@ -91,7 +91,8 @@ import {
   Odometer,
   Reading,
   Setting,
-  User
+  User,
+  ChatDotRound
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useMobile } from '@/composables/useMobile'
@@ -109,6 +110,7 @@ const menus = [
   { index: '/categories', label: '分类管理', icon: Menu },
   { index: '/users', label: '用户管理', icon: User },
   { index: '/orders', label: '订单管理', icon: List },
+  { index: '/consultations', label: '咨询管理', icon: ChatDotRound },
   { index: '/settings', label: '店铺设置', icon: Setting }
 ]
 

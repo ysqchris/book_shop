@@ -55,6 +55,12 @@ const routes = [
     meta: { title: '我的订单' }
   },
   {
+    path: '/consult',
+    name: 'Consult',
+    component: () => import('@/views/Consult.vue'),
+    meta: { title: '找书咨询' }
+  },
+  {
     path: '/profile',
     name: 'Profile',
     component: () => import('@/views/Profile.vue'),

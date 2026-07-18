@@ -121,6 +121,22 @@ CREATE TABLE IF NOT EXISTS shop_settings (
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='店铺配置';
 
+-- 找书咨询表（用户找不到书时留言，店家跟进）
+CREATE TABLE IF NOT EXISTS consultations (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '咨询ID',
+    name VARCHAR(50) NOT NULL COMMENT '咨询人姓名',
+    phone VARCHAR(50) NOT NULL COMMENT '联系电话/微信',
+    book_title VARCHAR(200) NOT NULL DEFAULT '' COMMENT '想找的书名',
+    content TEXT NULL COMMENT '咨询内容',
+    status TINYINT DEFAULT 0 COMMENT '状态(0-待处理,1-已联系,2-已关闭)',
+    reply VARCHAR(500) NULL COMMENT '店家回复',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '提交时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted TINYINT DEFAULT 0 COMMENT '逻辑删除标记',
+    INDEX idx_status (status),
+    INDEX idx_create_time (create_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='找书咨询';
+
 -- 插入初始数据
 -- 插入管理员用户
 INSERT INTO users (username, password, email, real_name, role) VALUES 

@@ -45,6 +45,12 @@ const routes = [
         meta: { title: '订单管理', requiresAuth: true }
       },
       {
+        path: 'consultations',
+        name: 'Consultations',
+        component: () => import('@/views/consultations/ConsultationList.vue'),
+        meta: { title: '咨询管理', requiresAuth: true }
+      },
+      {
         path: 'settings',
         name: 'ShopSettings',
         component: () => import('@/views/settings/ShopSettings.vue'),
