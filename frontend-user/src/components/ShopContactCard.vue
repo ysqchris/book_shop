@@ -28,46 +28,32 @@
       <div
         v-if="contact.wechatQrcode"
         class="qrcode-box"
-        role="button"
-        tabindex="0"
-        aria-label="点击放大店家微信二维码"
-        @click="openQrPreview"
-        @keydown.enter.prevent="openQrPreview"
       >
-        <img class="qrcode-img" :src="contact.wechatQrcode" alt="店家微信二维码" />
-        <p>点击放大 · 微信内可长按识别</p>
+        <el-image
+          class="qrcode-img"
+          :src="contact.wechatQrcode"
+          :preview-src-list="[contact.wechatQrcode]"
+          :preview-teleported="true"
+          :z-index="3000"
+          fit="contain"
+          alt="店家微信二维码"
+          hide-on-click-modal
+        />
+        <p>点击图片放大 · 微信内可长按识别</p>
       </div>
     </div>
 
     <p v-if="contact.tip" class="tip">{{ contact.tip }}</p>
-
-    <el-image-viewer
-      v-if="previewVisible"
-      :url-list="[contact.wechatQrcode]"
-      teleported
-      hide-on-click-modal
-      @close="previewVisible = false"
-    />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { ElImageViewer } from 'element-plus'
-
-const props = defineProps({
+defineProps({
   contact: { type: Object, default: null },
   title: { type: String, default: '商家信息' },
   lead: { type: String, default: '' },
   variant: { type: String, default: 'default' }
 })
-
-const previewVisible = ref(false)
-
-const openQrPreview = () => {
-  if (!props.contact?.wechatQrcode) return
-  previewVisible.value = true
-}
 </script>
 
 <style scoped>
