@@ -72,7 +72,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- 图书不存在 -->
     <div v-else class="book-not-found">
       <el-result icon="error" title="图书不存在" sub-title="抱歉，您查找的图书不存在或已下架">
@@ -81,6 +81,29 @@
         </template>
       </el-result>
     </div>
+  </div>
+
+  <!-- 移动端底部固定操作栏（参考小程序 book-detail actions） -->
+  <div class="mobile-actions" v-if="isMobile && book">
+    <el-input-number
+      v-model="quantity"
+      :min="1"
+      :max="book.stock"
+      size="default"
+      controls-position="right"
+      class="mobile-qty"
+    />
+    <el-button
+      class="mobile-btn-cart"
+      :disabled="book.stock === 0"
+      @click="addToCart"
+    >🛒 加入购物车</el-button>
+    <el-button
+      type="primary"
+      class="mobile-btn-buy"
+      :disabled="book.stock === 0"
+      @click="buyNow"
+    >立即购买</el-button>
   </div>
 </template>
 
@@ -91,12 +114,14 @@ import { ElMessage } from 'element-plus'
 import { ShoppingCart } from '@element-plus/icons-vue'
 import { useBookStore } from '@/stores/book'
 import { useCartStore } from '@/stores/cart'
+import { useMobile } from '@/composables/useMobile'
 import BookCover from '@/components/BookCover.vue'
 
 const route = useRoute()
 const router = useRouter()
 const bookStore = useBookStore()
 const cartStore = useCartStore()
+const { isMobile } = useMobile()
 
 const book = ref(null)
 const quantity = ref(1)
@@ -287,6 +312,32 @@ onMounted(() => {
   padding: 80px 0;
 }
 
+.mobile-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-qty {
+  width: 100px;
+}
+
+.mobile-btn-cart {
+  flex: 1;
+}
+
+.mobile-btn-buy {
+  flex: 1;
+}
+
 @media (max-width: 768px) {
   .book-basic-info {
     flex-direction: column;
@@ -294,8 +345,29 @@ onMounted(() => {
 
   .book-cover-section {
     flex: none;
-    width: min(260px, 100%);
+    width: min(220px, 100%);
     margin: 0 auto;
+  }
+
+  /* 移动端操作按钮移到底部固定栏，隐藏内嵌的 action-section */
+  .action-section {
+    display: none;
+  }
+
+  /* 为底部固定操作栏留出空间 */
+  .book-detail {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .detail-container {
+    padding: 16px;
+  }
+
+  .mobile-actions {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    /* 底部固定栏在 tabbar 之上 */
+    bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -2px 8px rgba(26, 35, 50, 0.1);
   }
 }
 </style>

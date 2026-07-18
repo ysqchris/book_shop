@@ -304,13 +304,69 @@ h1 {
 }
 
 @media (max-width: 640px) {
-  .item {
-    flex-wrap: wrap;
+  h1 {
+    font-size: 20px;
   }
+
+  .section {
+    padding: 14px 14px;
+    border-radius: 10px;
+  }
+
+  /* 商品行：移动端隐藏单独的价格和数量列，合并到 info 中 */
+  .item {
+    gap: 10px;
+    padding: 10px 0;
+  }
+
   .price,
-  .qty,
+  .qty {
+    display: none;
+  }
+
   .subtotal {
     width: auto;
+    font-size: 15px;
+  }
+
+  .info .meta::after {
+    content: attr(data-qty);
+  }
+
+  /* 表单标签上移，输入框全宽（参考小程序 form-item 布局） */
+  :deep(.el-form-item) {
+    display: block;
+    margin-bottom: 14px;
+  }
+
+  :deep(.el-form-item__label) {
+    float: none;
+    display: block;
+    width: auto !important;
+    text-align: left;
+    line-height: 1.4;
+    padding: 0 0 6px 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  :deep(.el-form-item__content) {
+    margin-left: 0 !important;
+  }
+
+  :deep(.el-cascader) {
+    width: 100% !important;
+  }
+
+  /* 操作按钮全宽 */
+  .actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .actions .el-button {
+    width: 100%;
+    margin: 0;
   }
 }
 </style>

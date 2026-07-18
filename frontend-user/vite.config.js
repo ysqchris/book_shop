@@ -12,6 +12,8 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    host: '0.0.0.0',
+    allowedHosts: ['.preview.with.woa.com', '.devnet-preview.with.woa.com'],
     proxy: {
       '/api': {
         target: 'http://localhost:8080',

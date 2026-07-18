@@ -188,4 +188,69 @@ h1 {
   font-size: 13px;
   color: #64748b;
 }
+
+/* ===== 移动端优化（参考小程序订单页布局） ===== */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 20px;
+  }
+
+  .order-card {
+    padding: 12px 14px;
+    border-radius: 10px;
+  }
+
+  /* 订单号 + 状态行：订单号可截断，状态保持显示 */
+  .row {
+    gap: 8px;
+  }
+
+  .no {
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  .status {
+    font-size: 12px;
+    flex-shrink: 0;
+    padding: 2px 8px;
+    background: var(--accent-soft);
+    border-radius: 10px;
+    line-height: 1.6;
+  }
+
+  .time {
+    font-size: 12px;
+  }
+
+  /* 商品行：移动端改为书名独占一行，价格×数量和小计在第二行 */
+  .item {
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    padding: 8px 0;
+  }
+
+  .item-title {
+    width: 100%;
+    font-size: 13px;
+  }
+
+  .item-sub {
+    min-width: auto;
+    margin-left: auto;
+    font-size: 13px;
+  }
+
+  /* 收件人信息：每项单独一行 */
+  .receiver {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+}
 </style>

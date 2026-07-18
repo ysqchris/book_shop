@@ -8,9 +8,9 @@ spring:
   # 数据源配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/used_book_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
-    username: root
-    password: 123456
+    url: jdbc:mysql://11.142.154.110:3306/k60qsc1m?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: with_zmzjujkhpnghhayi
+    password: "@ZCf92kZoGsX#z"
 
   servlet:
     multipart:

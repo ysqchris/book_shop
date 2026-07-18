@@ -1,11 +1,11 @@
 <template>
   <div class="books-page page-enter">
-    <section class="intro">
+    <section class="intro" v-if="!isMobile">
       <h2>图书选购</h2>
       <p class="desc">按分类浏览，或搜索书名、作者和出版社</p>
     </section>
 
-    <div class="toolbar">
+    <div class="toolbar" :class="{ 'toolbar--mobile': isMobile }">
       <el-input
         v-model="searchKeyword"
         placeholder="搜索书名、作者或出版社"
@@ -14,46 +14,55 @@
         @keyup.enter="handleSearch"
         @clear="handleSearch"
       >
-        <template #append>
+        <template #append v-if="!isMobile">
           <el-button :icon="Search" @click="handleSearch">搜索</el-button>
+        </template>
+        <template #append v-else>
+          <el-button :icon="Search" @click="handleSearch" />
         </template>
       </el-input>
 
-      <el-select v-model="sortBy" style="width: 140px" @change="handleSortChange">
+      <el-select
+        v-model="sortBy"
+        :style="isMobile ? { width: '112px' } : { width: '140px' }"
+        @change="handleSortChange"
+      >
         <el-option label="最新上架" value="newest" />
         <el-option label="价格升序" value="price_asc" />
         <el-option label="价格降序" value="price_desc" />
       </el-select>
 
-      <el-radio-group v-model="viewMode" class="view-mode">
-        <el-radio-button label="cover">封面</el-radio-button>
+      <el-radio-group v-if="!isMobile" v-model="viewModeStore.mode" class="view-mode" @change="viewModeStore.setMode">
+        <el-radio-button label="cover">卡片</el-radio-button>
         <el-radio-button label="text">列表</el-radio-button>
       </el-radio-group>
     </div>
 
     <div class="category-bar">
-      <button
-        class="category-chip"
-        :class="{ active: selectedCategory === '' }"
-        @click="selectCategory('')"
-      >
-        全部
-      </button>
-      <button
-        v-for="category in categories"
-        :key="category.id"
-        class="category-chip"
-        :class="{ active: String(selectedCategory) === String(category.id) }"
-        @click="selectCategory(category.id)"
-      >
-        {{ category.name }}
-      </button>
+      <div class="category-inner">
+        <button
+          class="category-chip"
+          :class="{ active: selectedCategory === '' }"
+          @click="selectCategory('')"
+        >
+          全部
+        </button>
+        <button
+          v-for="category in categories"
+          :key="category.id"
+          class="category-chip"
+          :class="{ active: String(selectedCategory) === String(category.id) }"
+          @click="selectCategory(category.id)"
+        >
+          {{ category.name }}
+        </button>
+      </div>
     </div>
 
-    <div class="books-list" v-loading="loading">
+    <div class="books-list" v-loading="loading && !books.length">
       <el-empty v-if="!loading && books.length === 0" description="暂无符合条件的图书" :image-size="80" />
 
-      <div v-else-if="viewMode === 'cover'" class="books-grid">
+      <div v-else-if="viewModeStore.mode === 'cover'" class="books-grid">
         <article
           v-for="book in books"
           :key="book.id"
@@ -61,7 +70,7 @@
           @click="$router.push(`/book/${book.id}`)"
         >
           <div class="cover-wrap">
-            <BookCover :src="book.coverImage" :title="book.title" height="170px" />
+            <BookCover :src="book.coverImage" :title="book.title" :height="isMobile ? '150px' : '170px'" />
           </div>
           <div class="book-info">
             <h4 class="book-title">{{ book.title }}</h4>
@@ -96,7 +105,8 @@
       </div>
     </div>
 
-    <div class="pagination-section">
+    <!-- 桌面端分页 -->
+    <div class="pagination-section" v-if="!isMobile">
       <el-pagination
         background
         v-model:current-page="currentPage"
@@ -108,6 +118,17 @@
         @current-change="handleCurrentChange"
       />
     </div>
+
+    <!-- 移动端：加载更多按钮 -->
+    <div class="load-more-section" v-if="isMobile && books.length > 0">
+      <button
+        class="load-more-btn"
+        :disabled="loading || !hasMore"
+        @click="loadMore"
+      >
+        {{ loading ? '加载中...' : (hasMore ? '加载更多' : '已加载全部') }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -117,25 +138,32 @@ import { Search } from '@element-plus/icons-vue'
 import { getBooksApi } from '@/api/book'
 import { getCategoriesApi } from '@/api/category'
 import BookCover from '@/components/BookCover.vue'
+import { useMobile } from '@/composables/useMobile'
+import { useViewModeStore } from '@/stores/viewMode'
 
 const VIEW_MODE_KEY = 'books_view_mode'
+
+const { isMobile } = useMobile()
+const viewModeStore = useViewModeStore()
 
 const searchKeyword = ref('')
 const selectedCategory = ref('')
 const sortBy = ref('newest')
-const viewMode = ref(localStorage.getItem(VIEW_MODE_KEY) === 'text' ? 'text' : 'cover')
+const viewMode = viewModeStore.mode
 const currentPage = ref(1)
 const pageSize = ref(24)
 const total = ref(0)
 const books = ref([])
 const categories = ref([])
 const loading = ref(false)
+const hasMore = ref(false)
 
-watch(viewMode, (mode) => {
+watch(viewModeStore.mode, (mode) => {
   localStorage.setItem(VIEW_MODE_KEY, mode)
 })
 
-const fetchBooks = async () => {
+const fetchBooks = async (append = false) => {
+  if (append && loading.value) return
   loading.value = true
   try {
     const params = {
@@ -152,14 +180,26 @@ const fetchBooks = async () => {
     const response = await getBooksApi(params)
     if (response.code === 200) {
       const data = response.data
-      books.value = Array.isArray(data) ? data : (data?.list || data?.books || [])
+      const list = Array.isArray(data) ? data : (data?.list || data?.books || [])
       total.value = Array.isArray(data) ? data.length : (data?.total || 0)
+      if (append) {
+        books.value = [...books.value, ...list]
+      } else {
+        books.value = list
+      }
+      hasMore.value = books.value.length < total.value
     }
   } catch (error) {
     console.error('获取图书列表失败:', error)
   } finally {
     loading.value = false
   }
+}
+
+const loadMore = () => {
+  if (!hasMore.value || loading.value) return
+  currentPage.value += 1
+  fetchBooks(true)
 }
 
 const fetchCategories = async () => {
@@ -245,12 +285,23 @@ onMounted(() => {
 }
 
 .category-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
   margin-bottom: 20px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.category-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.category-inner {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: max-content;
 }
 
 .category-chip {
@@ -414,6 +465,37 @@ onMounted(() => {
   padding-top: 22px;
 }
 
+/* ===== 移动端加载更多按钮 ===== */
+.load-more-section {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.load-more-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-block;
+  width: 100%;
+  padding: 11px 16px;
+  font-size: 14px;
+  color: var(--ink-soft);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.load-more-btn:active:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+}
+
+.load-more-btn:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
 @media (max-width: 1100px) {
   .books-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -423,7 +505,7 @@ onMounted(() => {
 @media (max-width: 800px) {
   .books-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    gap: 10px;
   }
 
   .search-input {
@@ -431,8 +513,116 @@ onMounted(() => {
     width: 100%;
   }
 
+  .toolbar {
+    gap: 8px;
+  }
+
+  /* 工具栏第一行：搜索框占满；第二行：排序+视图切换 */
+  .search-input {
+    order: 0;
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
   .view-mode {
-    margin-left: 0;
+    margin-left: auto;
+  }
+
+  /* 分类栏移动端：单行横向滚动，不换行（参考小程序 category-scroll） */
+  .category-inner {
+    flex-wrap: nowrap;
+  }
+}
+
+/* ===== 移动端紧凑布局（参考小程序 books 页） ===== */
+.toolbar--mobile {
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.toolbar--mobile .search-input {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+  order: 0;
+}
+
+.toolbar--mobile .el-select {
+  flex-shrink: 0;
+  order: 1;
+}
+
+/* 移动端视图切换：紧凑吸右 */
+.view-mode--mobile {
+  flex-shrink: 0;
+  margin-left: 0;
+  order: 2;
+}
+
+.view-mode--mobile :deep(.el-radio-button__inner) {
+  padding: 0 10px;
+  height: 32px;
+  line-height: 30px;
+  font-size: 12px;
+}
+
+.category-bar {
+  margin-bottom: 12px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.is-mobile .category-bar {
+  margin-bottom: 12px;
+}
+
+@media (max-width: 768px) {
+  .books-page {
+    /* 移动端减少整体留白 */
+  }
+
+  .toolbar {
+    margin-bottom: 10px;
+  }
+
+  .category-bar {
+    margin-bottom: 12px;
+  }
+
+  .category-chip {
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+
+  .book-info {
+    padding: 8px 10px 10px;
+  }
+
+  .book-title {
+    font-size: 13px;
+  }
+
+  .book-author {
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
+
+  .book-meta-row {
+    gap: 4px;
+  }
+
+  .current-price {
+    font-size: 14px;
+  }
+
+  .book-stock {
+    font-size: 10px;
+  }
+
+  .load-more-btn {
+    padding: 10px 14px;
+    font-size: 13px;
   }
 }
 </style>

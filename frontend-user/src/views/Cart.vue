@@ -318,8 +318,99 @@ const checkout = () => {
 }
 
 @media (max-width: 768px) {
+  .cart-page {
+    padding-bottom: 0;
+  }
+
+  .cart-content {
+    padding: 10px 12px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  /* 移动端购物车条目：参考小程序 cart.wxss，image + body 横排 */
   .cart-item {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 0;
+  }
+
+  .item-checkbox {
+    flex: 0 0 28px;
+    padding-top: 4px;
+  }
+
+  .item-image {
+    flex: 0 0 68px;
+  }
+
+  /* info 区域占满剩余空间，内部纵向排列 */
+  .item-info {
+    flex: 1;
+  }
+
+  .book-title {
+    font-size: 14px;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* 价格 / 数量控制行 */
+  .item-price,
+  .item-subtotal {
+    display: none;
+  }
+
+  .item-quantity {
+    flex: none;
+    margin-top: 8px;
+  }
+
+  /* 删除按钮放到 item-info 右上角 */
+  .item-actions {
+    flex: 0 0 auto;
+    align-self: flex-start;
+    padding-top: 2px;
+  }
+
+  /* 把小计跟在书名下面显示 */
+  .item-info::after {
+    display: none;
+  }
+
+  /* ---- 底部结算栏：固定在 Tab 栏上方 ---- */
+  .cart-footer {
+    position: fixed;
+    bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    left: 0;
+    right: 0;
+    margin: 0;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    padding: 10px 14px;
+    z-index: 50;
+    box-shadow: 0 -2px 8px rgba(26,35,50,0.10);
+    flex-wrap: nowrap;
+    gap: 10px;
+  }
+
+  .footer-left {
+    gap: 10px;
+  }
+
+  .total-amount {
+    font-size: 15px;
+  }
+
+  .checkout-btn {
+    min-width: 90px;
   }
 }
 </style>
