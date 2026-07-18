@@ -40,13 +40,20 @@
           <el-form-item label="联系电话" prop="receiverPhone">
             <el-input v-model="form.receiverPhone" placeholder="手机号，方便店家联系" maxlength="20" />
           </el-form-item>
-          <el-form-item label="收货地址" prop="receiverAddress">
+          <el-form-item label="所在地区" prop="region">
+            <el-cascader
+              v-model="form.region"
+              :options="regionOptions"
+              placeholder="请选择省 / 市 / 区"
+              clearable
+              style="width: 100%"
+            />
+          </el-form-item>
+          <el-form-item label="详细地址" prop="addressDetail">
             <el-input
-              v-model="form.receiverAddress"
-              type="textarea"
-              :rows="2"
-              placeholder="选填，也可下单后与店家确认"
-              maxlength="500"
+              v-model="form.addressDetail"
+              placeholder="街道、小区、门牌号等（选填）"
+              maxlength="200"
             />
           </el-form-item>
           <el-form-item label="备注">
@@ -67,6 +74,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { pcaTextArr } from 'element-china-area-data'
 import { createOrderApi, getBookDetailApi } from '@/api/book'
 import { getShopContactApi } from '@/api/shop'
 import { useCartStore } from '@/stores/cart'
@@ -83,10 +91,12 @@ const submitting = ref(false)
 const items = ref([])
 const shopContact = ref(null)
 const formRef = ref()
+const regionOptions = pcaTextArr
 const form = reactive({
   receiverName: '',
   receiverPhone: '',
-  receiverAddress: '',
+  region: ['湖南省', '株洲市', '攸县'],
+  addressDetail: '',
   remark: ''
 })
 
@@ -95,7 +105,15 @@ const rules = {
   receiverPhone: [
     { required: true, message: '请填写联系电话', trigger: 'blur' },
     { pattern: /^1\d{10}$|^0\d{2,3}-?\d{7,8}$/, message: '请输入有效电话', trigger: 'blur' }
-  ]
+  ],
+  region: [{ required: true, type: 'array', min: 3, message: '请选择所在地区', trigger: 'change' }]
+}
+
+const buildAddress = () => {
+  const regionPart = (form.region || []).join('')
+  const detail = (form.addressDetail || '').trim()
+  if (regionPart && detail) return `${regionPart}${detail}`
+  return regionPart || detail
 }
 
 const totalAmount = computed(() =>
@@ -155,9 +173,9 @@ const submitOrder = async () => {
   try {
     const payload = {
       userId: userStore.isLoggedIn ? userStore.userInfo?.id : null,
-      receiverName: form.receiverName,
-      receiverPhone: form.receiverPhone,
-      receiverAddress: form.receiverAddress,
+      receiverName: form.receiverName.trim(),
+      receiverPhone: form.receiverPhone.trim(),
+      receiverAddress: buildAddress(),
       remark: form.remark,
       items: items.value.map((item) => ({
         bookId: item.bookId,

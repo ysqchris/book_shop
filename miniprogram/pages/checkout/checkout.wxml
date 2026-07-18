@@ -44,19 +44,57 @@
       <view class="section-title">联系信息</view>
       <view class="form-item">
         <text class="label">联系人</text>
-        <input class="input" placeholder="您的姓名" value="{{form.receiverName}}" data-key="receiverName" bindinput="onInput" />
+        <input
+          class="input"
+          placeholder="您的姓名"
+          placeholder-class="ph"
+          value="{{form.receiverName}}"
+          data-key="receiverName"
+          bindinput="onInput"
+        />
       </view>
       <view class="form-item">
         <text class="label">联系电话</text>
-        <input class="input" type="number" placeholder="手机号" value="{{form.receiverPhone}}" data-key="receiverPhone" bindinput="onInput" />
+        <input
+          class="input"
+          type="number"
+          maxlength="11"
+          placeholder="手机号"
+          placeholder-class="ph"
+          value="{{form.receiverPhone}}"
+          data-key="receiverPhone"
+          bindinput="onInput"
+        />
       </view>
       <view class="form-item">
-        <text class="label">收货地址</text>
-        <textarea class="textarea" placeholder="选填，也可下单后与店家确认" value="{{form.receiverAddress}}" data-key="receiverAddress" bindinput="onInput" />
+        <text class="label">所在地区</text>
+        <picker mode="region" value="{{region}}" bindchange="onRegionChange">
+          <view class="picker {{regionText ? '' : 'placeholder'}}">
+            {{regionText || '请选择省 / 市 / 区'}}
+          </view>
+        </picker>
+      </view>
+      <view class="form-item">
+        <text class="label">详细地址</text>
+        <input
+          class="input"
+          placeholder="街道、小区、门牌号等（选填）"
+          placeholder-class="ph"
+          value="{{form.addressDetail}}"
+          data-key="addressDetail"
+          bindinput="onInput"
+        />
       </view>
       <view class="form-item">
         <text class="label">备注</text>
-        <textarea class="textarea" placeholder="选填" value="{{form.remark}}" data-key="remark" bindinput="onInput" />
+        <textarea
+          class="textarea"
+          placeholder="选填"
+          placeholder-class="ph"
+          value="{{form.remark}}"
+          data-key="remark"
+          bindinput="onInput"
+        />
       </view>
     </view>
 

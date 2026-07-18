@@ -9,10 +9,12 @@ Page({
     items: [],
     totalAmount: '0.00',
     shopContact: null,
+    region: ['湖南省', '株洲市', '攸县'],
+    regionText: '湖南省 株洲市 攸县',
     form: {
       receiverName: '',
       receiverPhone: '',
-      receiverAddress: '',
+      addressDetail: '',
       remark: ''
     }
   },
@@ -84,8 +86,23 @@ Page({
     })
   },
 
+  onRegionChange(e) {
+    const region = e.detail.value || []
+    this.setData({
+      region,
+      regionText: region.join(' ')
+    })
+  },
+
+  buildAddress() {
+    const regionPart = (this.data.region || []).join('')
+    const detail = (this.data.form.addressDetail || '').trim()
+    if (regionPart && detail) return `${regionPart}${detail}`
+    return regionPart || detail
+  },
+
   async submitOrder() {
-    const { form, items, submitting } = this.data
+    const { form, items, submitting, region } = this.data
     if (submitting) return
     if (!items.length) {
       wx.showToast({ title: '没有可下单的商品', icon: 'none' })
@@ -99,6 +116,10 @@ Page({
       wx.showToast({ title: '请填写有效手机号', icon: 'none' })
       return
     }
+    if (!region || region.length < 3) {
+      wx.showToast({ title: '请选择所在地区', icon: 'none' })
+      return
+    }
 
     this.setData({ submitting: true })
     try {
@@ -106,7 +127,7 @@ Page({
         userId: null,
         receiverName: form.receiverName.trim(),
         receiverPhone: form.receiverPhone.trim(),
-        receiverAddress: (form.receiverAddress || '').trim(),
+        receiverAddress: this.buildAddress(),
         remark: (form.remark || '').trim(),
         items: items.map((item) => ({
           bookId: item.bookId,

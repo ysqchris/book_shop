@@ -18,8 +18,10 @@ Page({
     page: 1,
     size: 20,
     total: 0,
-    totalPages: 1,
-    loading: false
+    hasMore: true,
+    loading: false,
+    loadingMore: false,
+    viewMode: 'text'
   },
 
   onShow() {
@@ -29,13 +31,24 @@ Page({
   },
 
   onLoad() {
+    try {
+      const saved = wx.getStorageSync('books_view_mode')
+      if (saved === 'text' || saved === 'cover') {
+        this.setData({ viewMode: saved })
+      }
+    } catch (e) {
+      // ignore
+    }
     this.loadCategories()
-    this.loadBooks()
+    this.reloadBooks()
   },
 
   onPullDownRefresh() {
-    this.setData({ page: 1 })
-    this.loadBooks().finally(() => wx.stopPullDownRefresh())
+    this.reloadBooks().finally(() => wx.stopPullDownRefresh())
+  },
+
+  onReachBottom() {
+    this.loadMoreBooks()
   },
 
   async loadCategories() {
@@ -47,10 +60,27 @@ Page({
     }
   },
 
-  async loadBooks() {
-    this.setData({ loading: true })
+  reloadBooks() {
+    this.setData({ page: 1, hasMore: true, books: [] })
+    return this.loadBooks({ reset: true })
+  },
+
+  loadMoreBooks() {
+    const { loading, loadingMore, hasMore, page } = this.data
+    if (loading || loadingMore || !hasMore) return Promise.resolve()
+    this.setData({ page: page + 1 })
+    return this.loadBooks({ reset: false })
+  },
+
+  async loadBooks({ reset = true } = {}) {
+    if (reset) {
+      this.setData({ loading: true })
+    } else {
+      this.setData({ loadingMore: true })
+    }
+
     try {
-      const { page, size, keyword, selectedCategory, sortIndex } = this.data
+      const { page, size, keyword, selectedCategory, sortIndex, books } = this.data
       const params = {
         page,
         size,
@@ -60,22 +90,28 @@ Page({
       if (selectedCategory !== '' && selectedCategory != null) {
         params.categoryId = selectedCategory
       }
+
       const res = await api.getBooks(params)
       const list = (res.data && res.data.list) || []
       const total = (res.data && res.data.total) || 0
-      const books = list.map((book) => ({
+      const mapped = list.map((book) => ({
         ...book,
         coverUrl: resolveUrl(book.coverImage)
       }))
+      const nextBooks = reset ? mapped : books.concat(mapped)
       this.setData({
-        books,
+        books: nextBooks,
         total,
-        totalPages: Math.max(1, Math.ceil(total / size))
+        hasMore: nextBooks.length < total && mapped.length > 0
       })
     } catch (e) {
-      this.setData({ books: [], total: 0, totalPages: 1 })
+      if (reset) {
+        this.setData({ books: [], total: 0, hasMore: false })
+      } else {
+        this.setData({ page: Math.max(1, this.data.page - 1) })
+      }
     } finally {
-      this.setData({ loading: false })
+      this.setData({ loading: false, loadingMore: false })
     }
   },
 
@@ -83,39 +119,43 @@ Page({
     this.setData({ keyword: e.detail.value })
   },
 
+  onClearKeyword() {
+    this.setData({ keyword: '' })
+    this.reloadBooks()
+  },
+
   onSearch() {
-    this.setData({ page: 1 })
-    this.loadBooks()
+    this.reloadBooks()
   },
 
   onSortChange(e) {
-    this.setData({ sortIndex: Number(e.detail.value), page: 1 })
-    this.loadBooks()
+    const sortIndex = Number(e.detail.value)
+    if (sortIndex === this.data.sortIndex) return
+    this.setData({ sortIndex })
+    this.reloadBooks()
+  },
+
+  onViewModeTap(e) {
+    const viewMode = e.currentTarget.dataset.mode
+    if (!viewMode || viewMode === this.data.viewMode) return
+    this.setData({ viewMode })
+    try {
+      wx.setStorageSync('books_view_mode', viewMode)
+    } catch (err) {
+      // ignore
+    }
   },
 
   onSelectCategory(e) {
     const id = e.currentTarget.dataset.id
     this.setData({
-      selectedCategory: id === '' || id == null ? '' : id,
-      page: 1
+      selectedCategory: id === '' || id == null ? '' : id
     })
-    this.loadBooks()
+    this.reloadBooks()
   },
 
   goDetail(e) {
     const id = e.currentTarget.dataset.id
     wx.navigateTo({ url: `/pages/book-detail/book-detail?id=${id}` })
-  },
-
-  prevPage() {
-    if (this.data.page <= 1) return
-    this.setData({ page: this.data.page - 1 })
-    this.loadBooks()
-  },
-
-  nextPage() {
-    if (this.data.page >= this.data.totalPages) return
-    this.setData({ page: this.data.page + 1 })
-    this.loadBooks()
   }
 })

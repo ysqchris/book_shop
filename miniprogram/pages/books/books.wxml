@@ -1,67 +1,99 @@
-<view class="container">
-  <view class="hero">
+<view class="page">
+  <view class="topbar">
     <image class="logo" src="/assets/logo.jpg" mode="aspectFill" />
-    <view class="hero-text">
-      <view class="page-title">三定圆梦书店</view>
-      <view class="page-desc">按分类浏览，或搜索书名、作者</view>
+    <view class="brand">三定圆梦书店</view>
+    <view class="count" wx:if="{{!loading && total > 0}}">共{{total}}本</view>
+    <view class="view-switch">
+      <view class="view-btn {{viewMode === 'text' ? 'active' : ''}}" data-mode="text" bindtap="onViewModeTap">列表</view>
+      <view class="view-btn {{viewMode === 'cover' ? 'active' : ''}}" data-mode="cover" bindtap="onViewModeTap">封面</view>
     </view>
   </view>
 
-  <view class="toolbar">
-    <input
-      class="search"
-      placeholder="搜索书名、作者或出版社"
-      value="{{keyword}}"
-      confirm-type="search"
-      bindinput="onKeywordInput"
-      bindconfirm="onSearch"
-    />
+  <view class="search-bar">
+    <view class="search-field">
+      <text class="search-icon">⌕</text>
+      <input
+        class="search-input"
+        placeholder="书名、作者、出版社"
+        placeholder-class="search-placeholder"
+        value="{{keyword}}"
+        confirm-type="search"
+        bindinput="onKeywordInput"
+        bindconfirm="onSearch"
+      />
+      <view wx:if="{{keyword}}" class="search-clear" bindtap="onClearKeyword">×</view>
+    </view>
     <picker mode="selector" range="{{sortLabels}}" value="{{sortIndex}}" bindchange="onSortChange">
-      <view class="sort">{{sortLabels[sortIndex]}}</view>
+      <view class="sort-picker">{{sortLabels[sortIndex]}} ▾</view>
     </picker>
   </view>
 
-  <scroll-view scroll-x class="category-bar" enable-flex>
-    <view
-      class="chip {{selectedCategory === '' ? 'active' : ''}}"
-      data-id=""
-      bindtap="onSelectCategory"
-    >全部</view>
-    <view
-      wx:for="{{categories}}"
-      wx:key="id"
-      class="chip {{selectedCategory == item.id ? 'active' : ''}}"
-      data-id="{{item.id}}"
-      bindtap="onSelectCategory"
-    >{{item.name}}</view>
+  <scroll-view class="category-scroll" scroll-x show-scrollbar="{{false}}">
+    <view class="category-row">
+      <view
+        class="cat-chip {{selectedCategory === '' ? 'active' : ''}}"
+        data-id=""
+        bindtap="onSelectCategory"
+      >全部</view>
+      <view
+        wx:for="{{categories}}"
+        wx:key="id"
+        class="cat-chip {{selectedCategory == item.id ? 'active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onSelectCategory"
+      >{{item.name}}</view>
+    </view>
   </scroll-view>
 
-  <view wx:if="{{loading}}" class="empty">加载中...</view>
+  <view wx:if="{{loading && !books.length}}" class="empty">加载中...</view>
   <view wx:elif="{{!books.length}}" class="empty">暂无符合条件的图书</view>
 
-  <view wx:else class="book-grid">
-    <view
-      class="book-item"
-      wx:for="{{books}}"
-      wx:key="id"
-      data-id="{{item.id}}"
-      bindtap="goDetail"
-    >
-      <image class="cover" src="{{item.coverUrl}}" mode="aspectFill" />
-      <view class="info">
-        <view class="title">{{item.title}}</view>
-        <view class="author">{{item.author}}</view>
-        <view class="meta">
+  <block wx:else>
+    <view wx:if="{{viewMode === 'text'}}" class="book-list">
+      <view
+        class="book-row"
+        wx:for="{{books}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="goDetail"
+      >
+        <view class="row-main">
+          <view class="title">{{item.title}}</view>
+          <view class="author">{{item.author || '作者未知'}}<text wx:if="{{item.publisher}}"> · {{item.publisher}}</text></view>
+        </view>
+        <view class="row-side">
           <text class="price">¥{{item.price}}</text>
-          <text class="muted">余 {{item.stock}}</text>
+          <text class="stock">余{{item.stock}}</text>
         </view>
       </view>
     </view>
-  </view>
 
-  <view class="pager" wx:if="{{total > 0}}">
-    <button class="btn-ghost pager-btn" disabled="{{page <= 1}}" bindtap="prevPage">上一页</button>
-    <text class="pager-text">{{page}} / {{totalPages}}</text>
-    <button class="btn-ghost pager-btn" disabled="{{page >= totalPages}}" bindtap="nextPage">下一页</button>
-  </view>
+    <view wx:else class="book-grid">
+      <view
+        class="book-item"
+        wx:for="{{books}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="goDetail"
+      >
+        <view class="cover-wrap">
+          <image class="cover" src="{{item.coverUrl}}" mode="aspectFill" />
+        </view>
+        <view class="info">
+          <view class="title">{{item.title}}</view>
+          <view class="author">{{item.author || '作者未知'}}</view>
+          <view class="meta">
+            <text class="price">¥{{item.price}}</text>
+            <text class="stock">余{{item.stock}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="load-status">
+      <text wx:if="{{loadingMore}}">加载中...</text>
+      <text wx:elif="{{!hasMore}}">已加载全部 {{total}} 本</text>
+      <text wx:else>上拉加载更多</text>
+    </view>
+  </block>
 </view>

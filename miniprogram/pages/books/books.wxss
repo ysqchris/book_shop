@@ -1,116 +1,268 @@
-.hero {
+.page {
+  padding: 16rpx 20rpx 40rpx;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.topbar {
   display: flex;
-  gap: 20rpx;
   align-items: center;
-  margin-bottom: 24rpx;
+  margin-bottom: 14rpx;
+  min-height: 56rpx;
 }
 
 .logo {
-  width: 108rpx;
-  height: 96rpx;
-  border-radius: 12rpx;
+  width: 52rpx;
+  height: 48rpx;
+  margin-right: 12rpx;
+  border-radius: 8rpx;
   border: 1rpx solid var(--border);
   background: #f5d84a;
   flex-shrink: 0;
 }
 
-.hero-text .page-title {
-  margin-bottom: 4rpx;
-}
-
-.hero-text .page-desc {
-  margin-bottom: 0;
-}
-
-.toolbar {
-  display: flex;
-  gap: 16rpx;
-  margin-bottom: 20rpx;
-}
-
-.search {
+.brand {
   flex: 1;
-  height: 72rpx;
-  padding: 0 20rpx;
-  background: var(--surface-raised);
-  border: 1rpx solid var(--border);
-  border-radius: 12rpx;
-  font-size: 26rpx;
-}
-
-.sort {
-  min-width: 160rpx;
-  height: 72rpx;
-  line-height: 72rpx;
-  padding: 0 20rpx;
-  background: var(--surface);
-  border: 1rpx solid var(--border);
-  border-radius: 12rpx;
-  font-size: 24rpx;
-  color: var(--ink-soft);
-  text-align: center;
-}
-
-.category-bar {
+  min-width: 0;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
-  margin-bottom: 24rpx;
-  padding-bottom: 8rpx;
 }
 
-.chip {
-  display: inline-block;
-  padding: 10rpx 22rpx;
-  margin-right: 12rpx;
-  border-radius: 12rpx;
+.count {
+  margin-left: 12rpx;
+  font-size: 22rpx;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.view-switch {
+  margin-left: 12rpx;
+  display: flex;
+  flex-shrink: 0;
+  background: #fff;
   border: 1rpx solid var(--border);
-  background: var(--surface);
-  color: var(--ink-soft);
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+
+.view-btn {
+  padding: 0 14rpx;
+  height: 40rpx;
+  line-height: 40rpx;
+  font-size: 20rpx;
+  color: var(--muted);
+}
+
+.view-btn.active {
+  color: #fff;
+  background: var(--accent);
+  font-weight: 600;
+}
+
+.book-list {
+  background: #fff;
+  border: 1rpx solid var(--border);
+  border-radius: 14rpx;
+  overflow: hidden;
+}
+
+.book-row {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 18rpx;
+  border-bottom: 1rpx solid #e8ecf1;
+}
+
+.book-row:last-child {
+  border-bottom: none;
+}
+
+.row-main {
+  flex: 1;
+  min-width: 0;
+  padding-right: 16rpx;
+}
+
+.row-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.book-row .title {
+  font-size: 28rpx;
+}
+
+.book-row .author {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+}
+
+.book-row .price {
+  font-size: 28rpx;
+}
+
+.book-row .stock {
+  margin-top: 4rpx;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.search-field {
+  flex: 1;
+  height: 64rpx;
+  padding: 0 16rpx;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1rpx solid var(--border);
+  border-radius: 32rpx;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.search-icon {
+  margin-right: 8rpx;
+  font-size: 26rpx;
+  color: var(--muted);
+  line-height: 1;
+}
+
+.search-input {
+  flex: 1;
+  height: 64rpx;
+  font-size: 24rpx;
+  color: var(--ink);
+  min-width: 0;
+}
+
+.search-placeholder {
+  color: #9aa3af;
   font-size: 24rpx;
 }
 
-.chip.active {
+.search-clear {
+  margin-left: 6rpx;
+  width: 36rpx;
+  height: 36rpx;
+  line-height: 32rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: var(--muted);
+}
+
+.sort-picker {
+  margin-left: 12rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+  padding: 0 16rpx;
+  font-size: 22rpx;
+  color: var(--ink-soft);
+  background: #fff;
+  border: 1rpx solid var(--border);
+  border-radius: 32rpx;
+  white-space: nowrap;
+  flex-shrink: 0;
+  max-width: 180rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.category-scroll {
+  width: 100%;
+  height: 56rpx;
+  margin-bottom: 16rpx;
+  white-space: nowrap;
+}
+
+.category-row {
+  display: inline-block;
+  white-space: nowrap;
+  height: 56rpx;
+  line-height: 56rpx;
+}
+
+.cat-chip {
+  display: inline-block;
+  vertical-align: middle;
+  height: 48rpx;
+  line-height: 48rpx;
+  padding: 0 18rpx;
+  margin-right: 10rpx;
+  font-size: 22rpx;
+  color: var(--ink-soft);
+  background: #fff;
+  border: 1rpx solid var(--border);
+  border-radius: 24rpx;
+  max-width: 280rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.cat-chip.active {
+  color: #fff;
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
   font-weight: 600;
 }
 
 .book-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 20rpx;
+  justify-content: space-between;
 }
 
 .book-item {
-  width: calc(50% - 10rpx);
-  background: var(--surface);
+  width: 346rpx;
+  margin-bottom: 16rpx;
+  background: #fff;
   border: 1rpx solid var(--border);
   border-radius: 16rpx;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.cover-wrap {
+  width: 100%;
+  height: 380rpx;
+  background: #e8ecf1;
   overflow: hidden;
 }
 
 .cover {
   width: 100%;
-  height: 280rpx;
-  background: #e2e6eb;
+  height: 100%;
   display: block;
 }
 
 .info {
-  padding: 16rpx;
+  padding: 12rpx 14rpx 16rpx;
 }
 
 .title {
-  font-size: 28rpx;
+  font-size: 26rpx;
   font-weight: 600;
+  color: var(--ink);
+  line-height: 1.35;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .author {
-  margin-top: 6rpx;
-  font-size: 22rpx;
+  margin-top: 4rpx;
+  font-size: 20rpx;
   color: var(--muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -118,28 +270,33 @@
 }
 
 .meta {
-  margin-top: 12rpx;
+  margin-top: 10rpx;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
 }
 
-.pager {
-  margin-top: 32rpx;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20rpx;
+.price {
+  font-size: 28rpx;
+  color: var(--price);
+  font-weight: 700;
 }
 
-.pager-btn {
-  margin: 0;
-  padding: 0 28rpx;
-  height: 64rpx;
-  line-height: 64rpx;
-}
-
-.pager-text {
+.stock {
+  font-size: 20rpx;
   color: var(--muted);
-  font-size: 24rpx;
+}
+
+.load-status {
+  padding: 28rpx 0 12rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--muted);
+}
+
+.empty {
+  padding: 100rpx 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 26rpx;
 }
