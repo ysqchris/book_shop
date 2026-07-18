@@ -14,6 +14,8 @@
       src="{{shopContact.wechatQrcodeUrl}}"
       mode="aspectFit"
       show-menu-by-longpress
+      data-url="{{shopContact.wechatQrcodeUrl}}"
+      bindtap="previewQrcode"
     />
     <view class="muted tip-text" wx:if="{{shopContact.tip}}">{{shopContact.tip}}</view>
   </view>

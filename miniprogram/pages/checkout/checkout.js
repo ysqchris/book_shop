@@ -79,6 +79,12 @@ Page({
     })
   },
 
+  previewQrcode(e) {
+    const url = e.currentTarget.dataset.url
+    if (!url) return
+    wx.previewImage({ current: url, urls: [url] })
+  },
+
   onInput(e) {
     const key = e.currentTarget.dataset.key
     this.setData({

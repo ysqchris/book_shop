@@ -76,6 +76,12 @@ Page({
     this.setData({ details })
   },
 
+  previewQrcode(e) {
+    const url = e.currentTarget.dataset.url
+    if (!url) return
+    wx.previewImage({ current: url, urls: [url] })
+  },
+
   callPhone(e) {
     const phone = e.currentTarget.dataset.phone
     if (!phone) return

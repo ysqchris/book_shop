@@ -25,23 +25,49 @@
         </li>
       </ul>
 
-      <div v-if="contact.wechatQrcode" class="qrcode-box">
-        <img :src="contact.wechatQrcode" alt="店家微信二维码" />
-        <p>微信扫一扫，添加店家</p>
+      <div
+        v-if="contact.wechatQrcode"
+        class="qrcode-box"
+        role="button"
+        tabindex="0"
+        aria-label="点击放大店家微信二维码"
+        @click="openQrPreview"
+        @keydown.enter.prevent="openQrPreview"
+      >
+        <img class="qrcode-img" :src="contact.wechatQrcode" alt="店家微信二维码" />
+        <p>点击放大 · 微信内可长按识别</p>
       </div>
     </div>
 
     <p v-if="contact.tip" class="tip">{{ contact.tip }}</p>
+
+    <el-image-viewer
+      v-if="previewVisible"
+      :url-list="[contact.wechatQrcode]"
+      teleported
+      hide-on-click-modal
+      @close="previewVisible = false"
+    />
   </div>
 </template>
 
 <script setup>
-defineProps({
+import { ref } from 'vue'
+import { ElImageViewer } from 'element-plus'
+
+const props = defineProps({
   contact: { type: Object, default: null },
   title: { type: String, default: '商家信息' },
   lead: { type: String, default: '' },
   variant: { type: String, default: 'default' }
 })
+
+const previewVisible = ref(false)
+
+const openQrPreview = () => {
+  if (!props.contact?.wechatQrcode) return
+  previewVisible.value = true
+}
 </script>
 
 <style scoped>
@@ -133,15 +159,20 @@ defineProps({
   background: var(--surface-raised);
   border: 1px solid var(--border);
   text-align: center;
+  cursor: zoom-in;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
-.qrcode-box img {
+.qrcode-img {
   width: 128px;
   height: 128px;
   object-fit: contain;
   display: block;
   margin: 0 auto;
   background: var(--surface-raised);
+  border-radius: 4px;
+  /* 保留指针事件，便于微信内长按识别二维码 */
 }
 
 .qrcode-box p {
@@ -167,6 +198,12 @@ defineProps({
 
   .qrcode-box {
     width: 100%;
+    padding: 14px;
+  }
+
+  .qrcode-img {
+    width: 168px;
+    height: 168px;
   }
 }
 </style>
