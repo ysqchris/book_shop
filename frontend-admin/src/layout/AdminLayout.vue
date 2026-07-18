@@ -1,6 +1,6 @@
 <template>
   <el-container class="admin-layout">
-    <el-aside v-if="!isMobile" width="220px" class="sidebar">
+    <el-aside v-if="!isMobile" class="sidebar desktop-sidebar" width="220px">
       <div class="brand">
         <img class="brand-logo" src="/shop-sign.png" alt="三定圆梦书店" />
         <div>
@@ -15,29 +15,9 @@
         text-color="#d1d5db"
         active-text-color="#ffffff"
       >
-        <el-menu-item index="/dashboard">
-          <el-icon><Odometer /></el-icon>
-          <span>仪表盘</span>
-        </el-menu-item>
-        <el-menu-item index="/books">
-          <el-icon><Reading /></el-icon>
-          <span>图书管理</span>
-        </el-menu-item>
-        <el-menu-item index="/categories">
-          <el-icon><Menu /></el-icon>
-          <span>分类管理</span>
-        </el-menu-item>
-        <el-menu-item index="/users">
-          <el-icon><User /></el-icon>
-          <span>用户管理</span>
-        </el-menu-item>
-        <el-menu-item index="/orders">
-          <el-icon><List /></el-icon>
-          <span>订单管理</span>
-        </el-menu-item>
-        <el-menu-item index="/settings">
-          <el-icon><Setting /></el-icon>
-          <span>店铺设置</span>
+        <el-menu-item v-for="item in menus" :key="item.index" :index="item.index">
+          <el-icon><component :is="item.icon" /></el-icon>
+          <span>{{ item.label }}</span>
         </el-menu-item>
       </el-menu>
     </el-aside>
@@ -45,7 +25,7 @@
     <el-drawer
       v-model="drawerOpen"
       direction="ltr"
-      size="260px"
+      size="78%"
       :with-header="false"
       class="mobile-drawer"
       append-to-body
@@ -66,29 +46,9 @@
           active-text-color="#ffffff"
           @select="drawerOpen = false"
         >
-          <el-menu-item index="/dashboard">
-            <el-icon><Odometer /></el-icon>
-            <span>仪表盘</span>
-          </el-menu-item>
-          <el-menu-item index="/books">
-            <el-icon><Reading /></el-icon>
-            <span>图书管理</span>
-          </el-menu-item>
-          <el-menu-item index="/categories">
-            <el-icon><Menu /></el-icon>
-            <span>分类管理</span>
-          </el-menu-item>
-          <el-menu-item index="/users">
-            <el-icon><User /></el-icon>
-            <span>用户管理</span>
-          </el-menu-item>
-          <el-menu-item index="/orders">
-            <el-icon><List /></el-icon>
-            <span>订单管理</span>
-          </el-menu-item>
-          <el-menu-item index="/settings">
-            <el-icon><Setting /></el-icon>
-            <span>店铺设置</span>
+          <el-menu-item v-for="item in menus" :key="item.index" :index="item.index">
+            <el-icon><component :is="item.icon" /></el-icon>
+            <span>{{ item.label }}</span>
           </el-menu-item>
         </el-menu>
       </div>
@@ -97,9 +57,15 @@
     <el-container class="main-wrap">
       <el-header class="header">
         <div class="header-left">
-          <el-button v-if="isMobile" class="menu-btn" text @click="drawerOpen = true">
-            <el-icon :size="22"><Fold /></el-icon>
-          </el-button>
+          <button
+            type="button"
+            class="menu-btn"
+            :class="{ 'is-mobile-show': isMobile }"
+            aria-label="打开菜单"
+            @click="drawerOpen = true"
+          >
+            <el-icon :size="22"><Expand /></el-icon>
+          </button>
           <div class="header-title">{{ currentTitle }}</div>
         </div>
         <div class="header-right">
@@ -115,33 +81,42 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import {
+  Expand,
+  List,
+  Menu,
+  Odometer,
+  Reading,
+  Setting,
+  User
+} from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
+import { useMobile } from '@/composables/useMobile'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const { isMobile } = useMobile()
 
 const drawerOpen = ref(false)
-const isMobile = ref(false)
+
+const menus = [
+  { index: '/dashboard', label: '仪表盘', icon: Odometer },
+  { index: '/books', label: '图书管理', icon: Reading },
+  { index: '/categories', label: '分类管理', icon: Menu },
+  { index: '/users', label: '用户管理', icon: User },
+  { index: '/orders', label: '订单管理', icon: List },
+  { index: '/settings', label: '店铺设置', icon: Setting }
+]
 
 const activeMenu = computed(() => route.path)
 const currentTitle = computed(() => route.meta.title || '管理后台')
 
-const updateViewport = () => {
-  isMobile.value = window.innerWidth <= 768
-  if (!isMobile.value) drawerOpen.value = false
-}
-
-onMounted(() => {
-  updateViewport()
-  window.addEventListener('resize', updateViewport)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', updateViewport)
+watch(isMobile, (mobile) => {
+  if (!mobile) drawerOpen.value = false
 })
 
 const handleLogout = async () => {
@@ -159,6 +134,9 @@ const handleLogout = async () => {
 <style scoped>
 .admin-layout {
   min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  overflow: hidden;
 }
 
 .sidebar {
@@ -203,6 +181,8 @@ const handleLogout = async () => {
 
 .main-wrap {
   min-width: 0;
+  flex: 1;
+  width: 100%;
 }
 
 .header {
@@ -211,8 +191,8 @@ const handleLogout = async () => {
   justify-content: space-between;
   background: #fff;
   border-bottom: 1px solid var(--admin-border);
-  padding: 0 16px;
-  height: 56px;
+  padding: 0 12px 0 8px;
+  height: 52px;
 }
 
 .header-left {
@@ -223,12 +203,29 @@ const handleLogout = async () => {
 }
 
 .menu-btn {
-  padding: 8px;
-  margin-left: -8px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #111827;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.menu-btn:active {
+  background: #f3f4f6;
+}
+
+.menu-btn.is-mobile-show {
+  display: inline-flex !important;
 }
 
 .header-title {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -238,7 +235,7 @@ const handleLogout = async () => {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   flex-shrink: 0;
 }
 
@@ -253,11 +250,22 @@ const handleLogout = async () => {
 .main {
   background: var(--admin-bg);
   padding: 16px;
+  overflow-x: hidden;
 }
 
-@media (max-width: 768px) {
+/* 手机 / 窄屏：隐藏常驻侧栏，显示汉堡菜单 */
+@media (max-width: 992px), ((hover: none) and (pointer: coarse) and (max-width: 1280px)) {
+  .desktop-sidebar {
+    display: none !important;
+    width: 0 !important;
+  }
+
+  .menu-btn {
+    display: inline-flex !important;
+  }
+
   .main {
-    padding: 12px;
+    padding: 10px;
   }
 
   .header-title {
@@ -271,6 +279,11 @@ const handleLogout = async () => {
 </style>
 
 <style>
+.mobile-drawer.el-drawer,
+.mobile-drawer .el-drawer {
+  background: #1f2a37;
+}
+
 .mobile-drawer .el-drawer__body {
   padding: 0;
   background: #1f2a37;

@@ -19,11 +19,11 @@
           </el-select>
           <el-button type="primary" @click="loadData">搜索</el-button>
         </div>
-        <el-button type="primary" class="desktop-add" @click="openDialog()">新增图书</el-button>
+        <el-button v-if="!isMobile" type="primary" class="desktop-add" @click="openDialog()">新增图书</el-button>
       </div>
 
-      <!-- 桌面表格 -->
-      <el-table :data="list" v-loading="loading" stripe class="desktop-table">
+      <!-- 桌面表格：窄屏不渲染，避免 fixed 列残留 -->
+      <el-table v-if="!isMobile" :data="list" v-loading="loading" stripe class="desktop-table">
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column label="封面" width="80">
           <template #default="{ row }">
@@ -50,7 +50,7 @@
       </el-table>
 
       <!-- 手机卡片列表 -->
-      <div class="mobile-list" v-loading="loading">
+      <div v-else class="mobile-list" v-loading="loading">
         <div v-if="!list.length && !loading" class="mobile-empty">暂无图书</div>
         <div v-for="row in list" :key="row.id" class="book-card">
           <el-image v-if="row.coverImage" :src="row.coverImage" fit="cover" class="card-cover" />
@@ -87,7 +87,7 @@
       </div>
     </el-card>
 
-    <el-button type="primary" class="mobile-fab" circle @click="openDialog()">
+    <el-button v-if="isMobile" type="primary" class="mobile-fab" circle @click="openDialog()">
       <el-icon :size="22"><Plus /></el-icon>
     </el-button>
 
@@ -188,18 +188,19 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { createBookApi, deleteBookApi, getAdminBooksApi, updateBookApi } from '@/api/book'
 import { getAdminCategoriesApi } from '@/api/category'
 import { uploadImageApi } from '@/api/upload'
+import { useMobile } from '@/composables/useMobile'
 
+const { isMobile } = useMobile()
 const loading = ref(false)
 const saving = ref(false)
 const uploading = ref(false)
 const dialogVisible = ref(false)
 const showMore = ref(false)
-const isMobile = ref(false)
 const list = ref([])
 const total = ref(0)
 const categories = ref([])
@@ -228,10 +229,6 @@ const form = reactive({
   status: 0,
   sellerId: 1
 })
-
-const updateViewport = () => {
-  isMobile.value = window.innerWidth <= 768
-}
 
 const resetForm = () => {
   Object.assign(form, {
@@ -356,14 +353,8 @@ const handleDelete = async (row) => {
 }
 
 onMounted(async () => {
-  updateViewport()
-  window.addEventListener('resize', updateViewport)
   await loadCategories()
   await loadData()
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', updateViewport)
 })
 </script>
 
@@ -506,9 +497,20 @@ onUnmounted(() => {
   min-width: 120px;
 }
 
-.mobile-list,
+.mobile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .mobile-fab {
-  display: none;
+  position: fixed;
+  right: 18px;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  width: 56px;
+  height: 56px;
+  z-index: 20;
+  box-shadow: 0 8px 20px rgba(47, 128, 237, 0.35);
 }
 
 .mobile-empty {
@@ -517,29 +519,68 @@ onUnmounted(() => {
   padding: 32px 0;
 }
 
-@media (max-width: 768px) {
-  .desktop-table,
-  .desktop-add {
-    display: none !important;
-  }
+.book-card {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: #fff;
+}
 
-  .mobile-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
+.card-cover {
+  width: 72px;
+  height: 96px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  background: #f3f4f6;
+}
 
-  .mobile-fab {
-    display: flex;
-    position: fixed;
-    right: 18px;
-    bottom: 24px;
-    width: 56px;
-    height: 56px;
-    z-index: 20;
-    box-shadow: 0 8px 20px rgba(47, 128, 237, 0.35);
-  }
+.card-cover.empty {
+  display: grid;
+  place-items: center;
+  color: #9ca3af;
+  font-size: 12px;
+}
 
+.card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  margin-bottom: 6px;
+  word-break: break-word;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.price {
+  color: #e11d48;
+  font-weight: 700;
+}
+
+.card-sub {
+  color: #6b7280;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+@media (max-width: 992px), ((hover: none) and (pointer: coarse) and (max-width: 1280px)) {
   .filter-keyword,
   .filter-select,
   .filter-status {
@@ -552,66 +593,6 @@ onUnmounted(() => {
 
   .filters .el-button {
     width: 100%;
-  }
-
-  .book-card {
-    display: flex;
-    gap: 12px;
-    padding: 12px;
-    border: 1px solid var(--admin-border);
-    border-radius: 10px;
-    background: #fff;
-  }
-
-  .card-cover {
-    width: 72px;
-    height: 96px;
-    border-radius: 6px;
-    flex-shrink: 0;
-    background: #f3f4f6;
-  }
-
-  .card-cover.empty {
-    display: grid;
-    place-items: center;
-    color: #9ca3af;
-    font-size: 12px;
-  }
-
-  .card-body {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .card-title {
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 1.35;
-    margin-bottom: 6px;
-  }
-
-  .card-meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 4px;
-  }
-
-  .price {
-    color: #e11d48;
-    font-weight: 700;
-  }
-
-  .card-sub {
-    color: #6b7280;
-    font-size: 13px;
-    margin-bottom: 8px;
-  }
-
-  .card-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
   }
 
   .cover-field {
@@ -637,7 +618,7 @@ onUnmounted(() => {
   }
 
   .page {
-    padding-bottom: 72px;
+    padding-bottom: 80px;
   }
 }
 </style>
