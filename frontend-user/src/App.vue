@@ -3,7 +3,7 @@
     <header class="header">
       <div class="header-content">
         <div class="logo" @click="$router.push('/books')">
-          <h1>易三定二手图书商店</h1>
+          <h1>三定圆梦书店</h1>
         </div>
         <nav class="nav-links">
           <router-link to="/books" class="nav-link" :class="{ active: isBooks }">选书</router-link>
@@ -22,7 +22,7 @@
 
     <footer class="footer">
       <div class="footer-content">
-        <p>© {{ year }} 易三定二手图书商店 · 下单后联系店家线下付款</p>
+        <p>© {{ year }} 三定圆梦书店 · 下单后联系店家线下付款</p>
       </div>
     </footer>
   </div>

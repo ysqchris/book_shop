@@ -2,8 +2,8 @@
   <div class="login-page">
     <div class="login-panel">
       <div class="login-copy">
-        <p class="eyebrow">易三定 · 管理后台</p>
-        <h1>易三定二手图书商店<br />管理后台</h1>
+        <p class="eyebrow">三定圆梦 · 管理后台</p>
+        <h1>三定圆梦书店<br />管理后台</h1>
         <p>管理图书、分类、用户与订单</p>
       </div>
       <el-card class="login-card" shadow="never">

@@ -128,7 +128,7 @@ INSERT INTO users (username, password, email, real_name, role) VALUES
 
 -- 店铺默认信息
 INSERT INTO shop_settings (id, shop_name, contact_phone, address, wechat_id, wechat_qrcode, tip) VALUES
-(1, '易三定二手图书商店', '13800138000', '请在管理后台填写店铺地址', '', '', '下单后请电话或微信联系店家完成付款与发货，暂不支持线上支付。');
+(1, '三定圆梦书店', '13800138000', '请在管理后台填写店铺地址', '', '', '下单后请电话或微信联系店家完成付款与发货，暂不支持线上支付。');
 
 -- 插入分类数据
 INSERT INTO categories (name, parent_id, level, sort_order, description) VALUES 

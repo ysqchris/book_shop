@@ -3,7 +3,7 @@
     <el-card class="login-card">
       <div class="login-header">
         <h2>用户登录</h2>
-        <p>欢迎回到易三定二手图书商店</p>
+        <p>欢迎回到三定圆梦书店</p>
       </div>
       
       <el-form

@@ -66,7 +66,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
   if (to.meta.title) {
-    document.title = `${to.meta.title} - 易三定二手图书商店管理后台`
+    document.title = `${to.meta.title} - 三定圆梦书店管理后台`
   }
 
   if (to.meta.requiresAuth && (!userStore.isLoggedIn || !userStore.isAdmin)) {

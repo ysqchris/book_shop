@@ -10,7 +10,7 @@
 
       <el-form ref="formRef" :model="form" :rules="rules" label-width="110px" style="max-width: 620px">
         <el-form-item label="店家名称" prop="shopName">
-          <el-input v-model="form.shopName" maxlength="100" placeholder="例如：易三定二手图书商店" />
+          <el-input v-model="form.shopName" maxlength="100" placeholder="例如：三定圆梦书店" />
         </el-form-item>
         <el-form-item label="联系电话" prop="contactPhone">
           <el-input v-model="form.contactPhone" maxlength="30" placeholder="买家联系用的手机号或座机" />

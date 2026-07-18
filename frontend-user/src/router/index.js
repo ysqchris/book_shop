@@ -81,7 +81,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.title) {
-    document.title = `${to.meta.title} - 易三定二手图书商店`
+    document.title = `${to.meta.title} - 三定圆梦书店`
   }
 
   if (to.meta.requiresAuth && !userStore.isLoggedIn) {

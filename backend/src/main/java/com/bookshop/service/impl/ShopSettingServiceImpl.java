@@ -71,7 +71,7 @@ public class ShopSettingServiceImpl implements ShopSettingService {
     private ShopSetting defaultSettings() {
         ShopSetting setting = new ShopSetting();
         setting.setId(SETTINGS_ID);
-        setting.setShopName("易三定二手图书商店");
+        setting.setShopName("三定圆梦书店");
         setting.setContactPhone("");
         setting.setAddress("");
         setting.setWechatId("");

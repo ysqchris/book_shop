@@ -2,10 +2,10 @@
   <el-container class="admin-layout">
     <el-aside width="220px" class="sidebar">
       <div class="brand">
-        <span class="brand-mark">易</span>
+        <span class="brand-mark">三</span>
         <div>
-          <strong>易三定</strong>
-          <p>二手图书商店 · 后台</p>
+          <strong>三定圆梦</strong>
+          <p>管理后台</p>
         </div>
       </div>
       <el-menu

@@ -7,7 +7,7 @@
         </div>
 
         <div class="book-info-section">
-          <p class="eyebrow">易三定二手图书商店</p>
+          <p class="eyebrow">三定圆梦书店</p>
           <h1 class="book-title">{{ book.title }}</h1>
           <div class="book-meta">
             <span>作者 {{ book.author }}</span>

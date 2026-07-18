@@ -3,7 +3,7 @@
     <el-card class="register-card">
       <div class="register-header">
         <h2>用户注册</h2>
-        <p>加入易三定二手图书商店</p>
+        <p>加入三定圆梦书店</p>
       </div>
 
       <el-form ref="formRef" :model="form" :rules="rules" class="register-form">
