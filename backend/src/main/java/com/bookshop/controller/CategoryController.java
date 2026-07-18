@@ -7,6 +7,7 @@ import com.bookshop.entity.Category;
 import com.bookshop.mapper.BookMapper;
 import com.bookshop.mapper.CategoryMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -95,6 +96,27 @@ public class CategoryController {
         }
         categoryMapper.updateById(category);
         return Result.success(categoryMapper.selectById(category.getId()));
+    }
+
+    /**
+     * 按传入 ID 顺序批量更新 sort_order（从 1 开始）
+     */
+    @PutMapping({"/admin/categories/sort", "/api/admin/categories/sort"})
+    public Result<Void> sortCategories(@RequestBody List<Long> ids) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return Result.error("排序列表不能为空");
+        }
+        for (int i = 0; i < ids.size(); i++) {
+            Long id = ids.get(i);
+            if (id == null) {
+                continue;
+            }
+            Category category = new Category();
+            category.setId(id);
+            category.setSortOrder(i + 1);
+            categoryMapper.updateById(category);
+        }
+        return Result.success(null);
     }
 
     @DeleteMapping({"/admin/category/{id}", "/api/admin/category/{id}"})
