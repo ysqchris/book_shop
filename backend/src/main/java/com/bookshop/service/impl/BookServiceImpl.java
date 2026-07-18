@@ -1,16 +1,16 @@
 package com.bookshop.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.bookshop.common.PageResult;
 import com.bookshop.entity.Book;
 import com.bookshop.mapper.BookMapper;
 import com.bookshop.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
-/**
- * 图书服务实现类
- */
 @Service
 public class BookServiceImpl implements BookService {
 
@@ -18,93 +18,86 @@ public class BookServiceImpl implements BookService {
     private BookMapper bookMapper;
 
     @Override
-    public boolean addBook(Book book) {
-        // 设置默认状态为上架
-        book.setStatus(0);
-        return bookMapper.insert(book) > 0;
+    public Book getBookById(Long id) {
+        return bookMapper.selectById(id);
     }
 
     @Override
-    public boolean updateBook(Book book) {
-        return bookMapper.updateById(book) > 0;
-    }
-
-    @Override
-    public Book getBookById(Long bookId) {
-        return bookMapper.selectById(bookId);
-    }
-
-    @Override
-    public List<Book> getBooksByCategoryId(Long categoryId) {
+    public PageResult<Book> getBooks(int page, int size, Long categoryId, String keyword, String sort) {
         QueryWrapper<Book> wrapper = new QueryWrapper<>();
-        wrapper.eq("category_id", categoryId)
-               .eq("status", 0)
-               .eq("deleted", 0)
-               .orderByDesc("create_time");
-        return bookMapper.selectList(wrapper);
-    }
-
-    @Override
-    public List<Book> searchBooks(String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return getAllAvailableBooks();
+        wrapper.eq("status", 0).eq("deleted", 0);
+        if (categoryId != null) {
+            wrapper.eq("category_id", categoryId);
         }
-        
-        QueryWrapper<Book> wrapper = new QueryWrapper<>();
-        wrapper.like("title", keyword)
-               .or().like("author", keyword)
-               .or().like("publisher", keyword)
-               .eq("status", 0)
-               .eq("deleted", 0)
-               .orderByDesc("create_time");
-        return bookMapper.selectList(wrapper);
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            wrapper.and(w -> w.like("title", keyword)
+                    .or().like("author", keyword)
+                    .or().like("publisher", keyword));
+        }
+        if ("price_asc".equals(sort)) {
+            wrapper.orderByAsc("price");
+        } else if ("price_desc".equals(sort)) {
+            wrapper.orderByDesc("price");
+        } else {
+            wrapper.orderByDesc("create_time");
+        }
+        Page<Book> pageData = bookMapper.selectPage(new Page<>(page, size), wrapper);
+        return new PageResult<>(pageData.getRecords(), pageData.getTotal(), page, size);
     }
 
     @Override
-    public List<Book> getBooksBySellerId(Long sellerId) {
+    public PageResult<Book> getAdminBooks(int page, int size, Long categoryId, Integer status, String keyword) {
         QueryWrapper<Book> wrapper = new QueryWrapper<>();
-        wrapper.eq("seller_id", sellerId)
-               .eq("deleted", 0)
-               .orderByDesc("create_time");
-        return bookMapper.selectList(wrapper);
+        wrapper.eq("deleted", 0);
+        if (categoryId != null) {
+            wrapper.eq("category_id", categoryId);
+        }
+        if (status != null) {
+            wrapper.eq("status", status);
+        }
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            wrapper.and(w -> w.like("title", keyword)
+                    .or().like("author", keyword)
+                    .or().like("isbn", keyword)
+                    .or().like("publisher", keyword));
+        }
+        wrapper.orderByDesc("create_time");
+        Page<Book> pageData = bookMapper.selectPage(new Page<>(page, size), wrapper);
+        return new PageResult<>(pageData.getRecords(), pageData.getTotal(), page, size);
     }
 
     @Override
-    public List<Book> getAllAvailableBooks() {
+    public Book addBook(Book book) {
+        if (book.getStatus() == null) {
+            book.setStatus(0);
+        }
+        bookMapper.insert(book);
+        return book;
+    }
+
+    @Override
+    public Book updateBook(Book book) {
+        bookMapper.updateById(book);
+        return book;
+    }
+
+    @Override
+    public void deleteBook(Long id) {
+        bookMapper.deleteById(id);
+    }
+
+    @Override
+    public List<Book> getHotBooks(int limit) {
         QueryWrapper<Book> wrapper = new QueryWrapper<>();
         wrapper.eq("status", 0)
-               .eq("deleted", 0)
-               .orderByDesc("create_time");
+                .eq("deleted", 0)
+                .orderByDesc("create_time")
+                .last("LIMIT " + Math.max(limit, 1));
         return bookMapper.selectList(wrapper);
     }
 
     @Override
-    public boolean disableBook(Long bookId) {
-        Book book = bookMapper.selectById(bookId);
-        if (book == null) {
-            return false;
-        }
-        book.setStatus(1); // 下架
-        return bookMapper.updateById(book) > 0;
-    }
-
-    @Override
-    public boolean enableBook(Long bookId) {
-        Book book = bookMapper.selectById(bookId);
-        if (book == null) {
-            return false;
-        }
-        book.setStatus(0); // 上架
-        return bookMapper.updateById(book) > 0;
-    }
-
-    @Override
-    public boolean updateStock(Long bookId, Integer quantity) {
-        Book book = bookMapper.selectById(bookId);
-        if (book == null) {
-            return false;
-        }
-        book.setStock(quantity);
-        return bookMapper.updateById(book) > 0;
+    public List<Book> getRecommendBooks(Long userId, int limit) {
+        return getHotBooks(limit);
     }
 }

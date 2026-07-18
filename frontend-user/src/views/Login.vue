@@ -54,7 +54,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
@@ -94,7 +94,7 @@ const handleLogin = async () => {
     
     if (result.success) {
       ElMessage.success('登录成功')
-      router.push('/')
+      router.push('/books')
     } else {
       ElMessage.error(result.message)
     }

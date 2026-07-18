@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+frontend-user/node_modules/
+frontend-admin/node_modules/
+
+# Build outputs
+backend/target/
+frontend-user/dist/
+frontend-admin/dist/
+
+# Logs & local env
+*.log
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Vite cache
+**/.vite/

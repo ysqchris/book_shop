@@ -3,17 +3,16 @@
     <!-- 导航栏 -->
     <el-header class="header">
       <div class="header-content">
-        <div class="logo">
-          <h1>📚 二手书平台</h1>
+        <div class="logo" @click="$router.push('/books')">
+          <h1>二手书平台</h1>
         </div>
         <div class="nav-menu">
           <el-menu
-            :default-active="$route.path"
+            :default-active="$route.path.startsWith('/book') ? '/books' : $route.path"
             mode="horizontal"
             router
             class="nav-menu-list"
           >
-            <el-menu-item index="/">首页</el-menu-item>
             <el-menu-item index="/books">图书浏览</el-menu-item>
             <el-menu-item index="/cart">购物车</el-menu-item>
             <el-menu-item index="/orders">我的订单</el-menu-item>
@@ -75,7 +74,7 @@ const logout = async () => {
     
     userStore.logout()
     ElMessage.success('退出成功')
-    router.push('/')
+    router.push('/books')
   } catch {
     // 用户取消操作
   }
@@ -91,8 +90,8 @@ const logout = async () => {
 
 .header {
   background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  height: 60px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  height: 52px;
   padding: 0;
 }
 
@@ -100,26 +99,31 @@ const logout = async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 12px;
   height: 100%;
+}
+
+.logo {
+  cursor: pointer;
 }
 
 .logo h1 {
   margin: 0;
-  color: #409eff;
-  font-size: 24px;
+  color: #1f2a37;
+  font-size: 18px;
 }
 
 .nav-menu-list {
   border-bottom: none;
+  height: 52px;
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .user-name {
@@ -129,8 +133,8 @@ const logout = async () => {
 
 .main-content {
   flex: 1;
-  padding: 20px;
-  max-width: 1200px;
+  padding: 12px;
+  max-width: 1280px;
   margin: 0 auto;
   width: 100%;
 }
@@ -138,11 +142,12 @@ const logout = async () => {
 .footer {
   background-color: #f5f7fa;
   text-align: center;
-  padding: 20px;
+  padding: 12px;
 }
 
 .footer-content p {
   margin: 0;
   color: #909399;
+  font-size: 12px;
 }
 </style>

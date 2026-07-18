@@ -16,4 +16,7 @@ public interface OrderItemMapper extends BaseMapper<OrderItem> {
     
     @Select("SELECT * FROM order_items WHERE book_id = #{bookId} AND deleted = 0")
     List<OrderItem> selectByBookId(@Param("bookId") Long bookId);
+
+    @Select("SELECT COALESCE(SUM(quantity), 0) FROM order_items WHERE deleted = 0")
+    Long sumSoldQuantity();
 }

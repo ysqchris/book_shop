@@ -4,12 +4,7 @@
       <!-- 图书基本信息 -->
       <div class="book-basic-info">
         <div class="book-cover-section">
-          <el-image
-            :src="book.coverImage || '/default-book.jpg'"
-            :alt="book.title"
-            class="book-cover"
-            fit="cover"
-          />
+          <BookCover :src="book.coverImage" :title="book.title" height="360px" />
         </div>
         
         <div class="book-info-section">
@@ -127,9 +122,7 @@
         <el-row :gutter="20">
           <el-col :span="6" v-for="relatedBook in relatedBooks" :key="relatedBook.id">
             <el-card class="related-book-card" shadow="hover" @click="$router.push(`/book/${relatedBook.id}`)">
-              <div class="book-cover">
-                <img :src="relatedBook.coverImage || '/default-book.jpg'" :alt="relatedBook.title" />
-              </div>
+              <BookCover :src="relatedBook.coverImage" :title="relatedBook.title" />
               <div class="book-info">
                 <h4 class="book-title">{{ relatedBook.title }}</h4>
                 <p class="book-author">{{ relatedBook.author }}</p>
@@ -159,6 +152,7 @@ import { ElMessage } from 'element-plus'
 import { ShoppingCart } from '@element-plus/icons-vue'
 import { useBookStore } from '@/stores/book'
 import { useUserStore } from '@/stores/user'
+import BookCover from '@/components/BookCover.vue'
 
 const route = useRoute()
 const router = useRouter()

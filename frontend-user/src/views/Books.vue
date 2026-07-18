@@ -1,117 +1,141 @@
 <template>
   <div class="books-page">
-    <!-- 搜索栏 -->
-    <div class="search-section">
+    <div class="stats-banner">
+      <div class="stat-item" v-for="item in statItems" :key="item.label">
+        <strong>{{ item.value }}</strong>
+        <span>{{ item.label }}</span>
+      </div>
+    </div>
+
+    <div class="toolbar">
       <el-input
         v-model="searchKeyword"
-        placeholder="搜索图书标题、作者或出版社"
-        size="large"
+        placeholder="搜索书名、作者或出版社"
+        size="default"
+        clearable
         class="search-input"
         @keyup.enter="handleSearch"
+        @clear="handleSearch"
       >
         <template #append>
           <el-button :icon="Search" @click="handleSearch">搜索</el-button>
         </template>
       </el-input>
-      
-      <div class="filter-section">
-        <el-select v-model="selectedCategory" placeholder="选择分类" @change="handleCategoryChange">
-          <el-option label="全部" value=""></el-option>
-          <el-option
-            v-for="category in categories"
-            :key="category.id"
-            :label="category.name"
-            :value="category.id"
-          />
-        </el-select>
-        
-        <el-select v-model="sortBy" placeholder="排序方式" @change="handleSortChange">
-          <el-option label="最新上架" value="newest"></el-option>
-          <el-option label="价格从低到高" value="price_asc"></el-option>
-          <el-option label="价格从高到低" value="price_desc"></el-option>
-        </el-select>
+
+      <el-select v-model="sortBy" size="default" style="width: 140px" @change="handleSortChange">
+        <el-option label="最新上架" value="newest" />
+        <el-option label="价格升序" value="price_asc" />
+        <el-option label="价格降序" value="price_desc" />
+      </el-select>
+    </div>
+
+    <div class="category-bar">
+      <button
+        class="category-chip"
+        :class="{ active: selectedCategory === '' }"
+        @click="selectCategory('')"
+      >
+        全部
+      </button>
+      <button
+        v-for="category in categories"
+        :key="category.id"
+        class="category-chip"
+        :class="{ active: selectedCategory === category.id }"
+        @click="selectCategory(category.id)"
+      >
+        {{ category.name }}
+      </button>
+    </div>
+
+    <div class="books-list" v-loading="loading">
+      <el-empty v-if="!loading && books.length === 0" description="暂无符合条件的图书" :image-size="80" />
+      <div v-else class="books-grid">
+        <div
+          v-for="book in books"
+          :key="book.id"
+          class="book-card"
+          @click="$router.push(`/book/${book.id}`)"
+        >
+          <BookCover :src="book.coverImage" :title="book.title" height="150px" />
+          <div class="book-info">
+            <h4 class="book-title">{{ book.title }}</h4>
+            <p class="book-author">{{ book.author }}</p>
+            <div class="book-meta-row">
+              <span class="current-price">¥{{ book.price }}</span>
+              <span class="book-stock">库存 {{ book.stock }}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- 图书列表 -->
-    <div class="books-list">
-      <el-row :gutter="20">
-        <el-col :span="6" v-for="book in books" :key="book.id">
-          <el-card class="book-card" shadow="hover" @click="$router.push(`/book/${book.id}`)">
-            <div class="book-cover">
-              <img :src="book.coverImage || '/default-book.jpg'" :alt="book.title" />
-            </div>
-            <div class="book-info">
-              <h4 class="book-title">{{ book.title }}</h4>
-              <p class="book-author">{{ book.author }}</p>
-              <p class="book-publisher">{{ book.publisher }}</p>
-              <div class="book-price-section">
-                <span class="current-price">¥{{ book.price }}</span>
-                <span class="original-price">¥{{ book.originalPrice }}</span>
-              </div>
-              <div class="book-stock">库存: {{ book.stock }}本</div>
-            </div>
-          </el-card>
-        </el-col>
-      </el-row>
-    </div>
-
-    <!-- 分页 -->
     <div class="pagination-section">
       <el-pagination
+        small
+        background
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
         :total="total"
-        :page-sizes="[12, 24, 36, 48]"
-        layout="total, sizes, prev, pager, next, jumper"
+        :page-sizes="[18, 24, 36, 48]"
+        layout="total, sizes, prev, pager, next"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       />
-    </div>
-
-    <!-- 加载状态 -->
-    <div v-if="loading" class="loading-section">
-      <el-skeleton :rows="6" animated />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { Search } from '@element-plus/icons-vue'
-import { getBooksApi, searchBooksApi } from '@/api/book'
+import { getBooksApi } from '@/api/book'
 import { getCategoriesApi } from '@/api/category'
+import { getStatsApi } from '@/api/stats'
+import BookCover from '@/components/BookCover.vue'
 
 const searchKeyword = ref('')
 const selectedCategory = ref('')
 const sortBy = ref('newest')
 const currentPage = ref(1)
-const pageSize = ref(12)
+const pageSize = ref(24)
 const total = ref(0)
 const books = ref([])
 const categories = ref([])
 const loading = ref(false)
+const stats = ref({
+  bookCount: 0,
+  onSaleBookCount: 0,
+  soldCount: 0,
+  categoryCount: 0,
+  userCount: 0
+})
 
-// 获取图书列表
+const statItems = computed(() => [
+  { label: '在售图书', value: stats.value.onSaleBookCount || stats.value.bookCount || 0 },
+  { label: '累计卖出', value: stats.value.soldCount || 0 },
+  { label: '图书分类', value: stats.value.categoryCount || 0 }
+])
+
 const fetchBooks = async () => {
   loading.value = true
-  
   try {
     const params = {
       page: currentPage.value,
       size: pageSize.value,
-      categoryId: selectedCategory.value,
       sort: sortBy.value
     }
-    
+    if (selectedCategory.value !== '' && selectedCategory.value != null) {
+      params.categoryId = selectedCategory.value
+    }
     if (searchKeyword.value) {
       params.keyword = searchKeyword.value
     }
-    
     const response = await getBooksApi(params)
     if (response.code === 200) {
-      books.value = response.data.books
-      total.value = response.data.total
+      const data = response.data
+      books.value = Array.isArray(data) ? data : (data?.list || data?.books || [])
+      total.value = Array.isArray(data) ? data.length : (data?.total || 0)
     }
   } catch (error) {
     console.error('获取图书列表失败:', error)
@@ -120,152 +144,224 @@ const fetchBooks = async () => {
   }
 }
 
-// 获取分类列表
 const fetchCategories = async () => {
-  try {
-    const response = await getCategoriesApi()
-    if (response.code === 200) {
-      categories.value = response.data
-    }
-  } catch (error) {
-    console.error('获取分类列表失败:', error)
+  const response = await getCategoriesApi()
+  if (response.code === 200) {
+    categories.value = response.data || []
   }
 }
 
-// 搜索处理
+const fetchStats = async () => {
+  try {
+    const response = await getStatsApi()
+    if (response.code === 200) {
+      stats.value = { ...stats.value, ...response.data }
+    }
+  } catch (error) {
+    console.error('获取统计失败:', error)
+  }
+}
+
 const handleSearch = () => {
   currentPage.value = 1
   fetchBooks()
 }
 
-// 分类改变
-const handleCategoryChange = () => {
+const selectCategory = (id) => {
+  selectedCategory.value = id
   currentPage.value = 1
   fetchBooks()
 }
 
-// 排序改变
 const handleSortChange = () => {
+  currentPage.value = 1
   fetchBooks()
 }
 
-// 分页大小改变
 const handleSizeChange = (size) => {
   pageSize.value = size
   currentPage.value = 1
   fetchBooks()
 }
 
-// 页码改变
 const handleCurrentChange = (page) => {
   currentPage.value = page
   fetchBooks()
 }
 
-// 监听分页和排序变化
-watch([currentPage, sortBy], () => {
-  fetchBooks()
-})
-
 onMounted(() => {
-  fetchBooks()
+  fetchStats()
   fetchCategories()
+  fetchBooks()
 })
 </script>
 
 <style scoped>
 .books-page {
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 20px;
 }
 
-.search-section {
-  margin-bottom: 30px;
+.stats-banner {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #1f2a37 0%, #2f4b6e 100%);
+  color: #fff;
+}
+
+.stat-item {
+  text-align: center;
+  min-width: 0;
+}
+
+.stat-item strong {
+  display: block;
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.stat-item span {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 .search-input {
-  width: 400px;
-  margin-right: 20px;
+  flex: 1;
+  max-width: 420px;
 }
 
-.filter-section {
-  margin-top: 20px;
+.category-bar {
   display: flex;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.category-chip {
+  border: 1px solid #dcdfe6;
+  background: #fff;
+  color: #606266;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.category-chip:hover {
+  border-color: #409eff;
+  color: #409eff;
+}
+
+.category-chip.active {
+  background: #409eff;
+  border-color: #409eff;
+  color: #fff;
 }
 
 .books-list {
-  margin-bottom: 30px;
+  min-height: 240px;
+}
+
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .book-card {
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
+  overflow: hidden;
   cursor: pointer;
-  transition: transform 0.3s;
-  margin-bottom: 20px;
+  transition: box-shadow 0.2s, transform 0.2s;
 }
 
 .book-card:hover {
-  transform: translateY(-5px);
-}
-
-.book-cover img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 4px;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
 
 .book-info {
-  padding: 10px 0;
+  padding: 8px;
 }
 
 .book-title {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 5px;
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.book-author,
-.book-publisher {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 5px;
+.book-author {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: #909399;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.book-price-section {
+.book-meta-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 10px 0;
+  justify-content: space-between;
+  gap: 6px;
 }
 
 .current-price {
-  font-size: 18px;
-  color: #f56c6c;
-  font-weight: bold;
-}
-
-.original-price {
   font-size: 14px;
-  color: #999;
-  text-decoration: line-through;
+  color: #f56c6c;
+  font-weight: 700;
 }
 
 .book-stock {
-  font-size: 12px;
+  font-size: 11px;
   color: #67c23a;
 }
 
 .pagination-section {
   display: flex;
   justify-content: center;
+  margin-top: 14px;
 }
 
-.loading-section {
-  margin-top: 20px;
+@media (max-width: 1100px) {
+  .books-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-banner {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .books-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .toolbar {
+    flex-wrap: wrap;
+  }
+
+  .search-input {
+    max-width: none;
+    width: 100%;
+  }
 }
 </style>

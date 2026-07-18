@@ -4,9 +4,7 @@ import { useUserStore } from '@/stores/user'
 const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: () => import('@/views/Home.vue'),
-    meta: { title: '首页' }
+    redirect: '/books'
   },
   {
     path: '/login',
@@ -63,32 +61,27 @@ const router = createRouter({
   routes
 })
 
-// 路由守卫
 router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
-  
-  // 检查登录状态
+
   if (!userStore.isLoggedIn && userStore.token) {
     await userStore.checkLoginStatus()
   }
-  
-  // 设置页面标题
+
   if (to.meta.title) {
     document.title = `${to.meta.title} - 二手书平台`
   }
-  
-  // 检查是否需要登录
+
   if (to.meta.requiresAuth && !userStore.isLoggedIn) {
     next('/login')
     return
   }
-  
-  // 检查是否只允许未登录用户访问
+
   if (to.meta.guestOnly && userStore.isLoggedIn) {
-    next('/')
+    next('/books')
     return
   }
-  
+
   next()
 })
 
