@@ -129,12 +129,22 @@ const handleLogin = async () => {
 }
 
 @media (max-width: 768px) {
+  .login-page {
+    padding: 16px;
+    align-items: stretch;
+  }
+
   .login-panel {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .login-copy h1 {
-    font-size: 32px;
+    font-size: 28px;
+  }
+
+  .login-copy {
+    text-align: center;
   }
 }
 </style>

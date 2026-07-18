@@ -68,17 +68,38 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Book addBook(Book book) {
-        if (book.getStatus() == null) {
-            book.setStatus(0);
-        }
+        normalizeBook(book);
         bookMapper.insert(book);
         return book;
     }
 
     @Override
     public Book updateBook(Book book) {
+        if (book.getAuthor() == null) {
+            book.setAuthor("");
+        }
         bookMapper.updateById(book);
         return book;
+    }
+
+    private void normalizeBook(Book book) {
+        if (book.getTitle() != null) {
+            book.setTitle(book.getTitle().trim());
+        }
+        if (book.getAuthor() == null || book.getAuthor().isBlank()) {
+            book.setAuthor("");
+        } else {
+            book.setAuthor(book.getAuthor().trim());
+        }
+        if (book.getStatus() == null) {
+            book.setStatus(0);
+        }
+        if (book.getStock() == null) {
+            book.setStock(1);
+        }
+        if (book.getSellerId() == null) {
+            book.setSellerId(1L);
+        }
     }
 
     @Override

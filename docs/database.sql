@@ -43,11 +43,11 @@ CREATE TABLE IF NOT EXISTS categories (
 CREATE TABLE IF NOT EXISTS books (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '图书ID',
     title VARCHAR(200) NOT NULL COMMENT '图书标题',
-    author VARCHAR(100) NOT NULL COMMENT '作者',
+    author VARCHAR(100) NOT NULL DEFAULT '' COMMENT '作者',
     isbn VARCHAR(20) COMMENT 'ISBN',
     publisher VARCHAR(100) COMMENT '出版社',
     publish_date VARCHAR(20) COMMENT '出版日期',
-    category_id BIGINT NOT NULL COMMENT '分类ID',
+    category_id BIGINT NULL COMMENT '分类ID',
     price DECIMAL(10,2) NOT NULL COMMENT '价格',
     original_price DECIMAL(10,2) COMMENT '原价',
     stock INT DEFAULT 0 COMMENT '库存数量',
