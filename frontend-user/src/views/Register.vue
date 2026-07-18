@@ -3,7 +3,7 @@
     <el-card class="register-card">
       <div class="register-header">
         <h2>用户注册</h2>
-        <p>加入二手书平台，开启阅读新旅程</p>
+        <p>加入易三定二手图书商店</p>
       </div>
 
       <el-form ref="formRef" :model="form" :rules="rules" class="register-form">
@@ -109,14 +109,16 @@ const handleRegister = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: transparent;
   padding: 20px;
 }
 
 .register-card {
   width: 420px;
   padding: 40px;
-  border-radius: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
 }
 
 .register-header {

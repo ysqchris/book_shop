@@ -3,7 +3,7 @@
     <el-card class="login-card">
       <div class="login-header">
         <h2>用户登录</h2>
-        <p>欢迎回到二手书平台</p>
+        <p>欢迎回到易三定二手图书商店</p>
       </div>
       
       <el-form
@@ -129,15 +129,16 @@ onUnmounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: transparent;
   padding: 20px;
 }
 
 .login-card {
   width: 400px;
   padding: 40px;
-  border-radius: 10px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
 }
 
 .login-header {

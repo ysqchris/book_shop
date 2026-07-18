@@ -4,6 +4,8 @@ export const getAdminOrdersApi = (params) => request.get('/api/admin/orders', { 
 
 export const getOrderDetailApi = (id) => request.get(`/api/admin/order/${id}`)
 
+export const confirmPayApi = (id) => request.put(`/api/admin/order/${id}/confirm-pay`)
+
 export const shipOrderApi = (id) => request.put(`/api/admin/order/${id}/ship`)
 
 export const completeOrderApi = (id) => request.put(`/api/admin/order/${id}/complete`)

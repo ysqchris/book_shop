@@ -109,10 +109,26 @@ CREATE TABLE IF NOT EXISTS order_items (
     FOREIGN KEY (book_id) REFERENCES books(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='订单明细表';
 
+-- 店铺配置（商家在管理后台维护）
+CREATE TABLE IF NOT EXISTS shop_settings (
+    id BIGINT PRIMARY KEY COMMENT '固定为1',
+    shop_name VARCHAR(100) NOT NULL DEFAULT '' COMMENT '店家名称',
+    contact_phone VARCHAR(30) NOT NULL DEFAULT '' COMMENT '联系电话',
+    address VARCHAR(500) NOT NULL DEFAULT '' COMMENT '店铺地址',
+    wechat_id VARCHAR(100) NOT NULL DEFAULT '' COMMENT '微信号',
+    wechat_qrcode VARCHAR(500) NOT NULL DEFAULT '' COMMENT '微信二维码图片地址',
+    tip VARCHAR(500) DEFAULT NULL COMMENT '下单提示',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='店铺配置';
+
 -- 插入初始数据
 -- 插入管理员用户
 INSERT INTO users (username, password, email, real_name, role) VALUES 
 ('admin', MD5('admin123'), 'admin@bookshop.com', '系统管理员', 1);
+
+-- 店铺默认信息
+INSERT INTO shop_settings (id, shop_name, contact_phone, address, wechat_id, wechat_qrcode, tip) VALUES
+(1, '易三定二手图书商店', '13800138000', '请在管理后台填写店铺地址', '', '', '下单后请电话或微信联系店家完成付款与发货，暂不支持线上支付。');
 
 -- 插入分类数据
 INSERT INTO categories (name, parent_id, level, sort_order, description) VALUES 

@@ -1,17 +1,14 @@
 <template>
-  <div class="books-page">
-    <div class="stats-banner">
-      <div class="stat-item" v-for="item in statItems" :key="item.label">
-        <strong>{{ item.value }}</strong>
-        <span>{{ item.label }}</span>
-      </div>
-    </div>
+  <div class="books-page page-enter">
+    <section class="intro">
+      <h2>图书选购</h2>
+      <p class="desc">按分类浏览，或搜索书名、作者和出版社</p>
+    </section>
 
     <div class="toolbar">
       <el-input
         v-model="searchKeyword"
         placeholder="搜索书名、作者或出版社"
-        size="default"
         clearable
         class="search-input"
         @keyup.enter="handleSearch"
@@ -22,11 +19,16 @@
         </template>
       </el-input>
 
-      <el-select v-model="sortBy" size="default" style="width: 140px" @change="handleSortChange">
+      <el-select v-model="sortBy" style="width: 140px" @change="handleSortChange">
         <el-option label="最新上架" value="newest" />
         <el-option label="价格升序" value="price_asc" />
         <el-option label="价格降序" value="price_desc" />
       </el-select>
+
+      <el-radio-group v-model="viewMode" class="view-mode">
+        <el-radio-button label="cover">封面</el-radio-button>
+        <el-radio-button label="text">列表</el-radio-button>
+      </el-radio-group>
     </div>
 
     <div class="category-bar">
@@ -41,7 +43,7 @@
         v-for="category in categories"
         :key="category.id"
         class="category-chip"
-        :class="{ active: selectedCategory === category.id }"
+        :class="{ active: String(selectedCategory) === String(category.id) }"
         @click="selectCategory(category.id)"
       >
         {{ category.name }}
@@ -50,21 +52,45 @@
 
     <div class="books-list" v-loading="loading">
       <el-empty v-if="!loading && books.length === 0" description="暂无符合条件的图书" :image-size="80" />
-      <div v-else class="books-grid">
-        <div
+
+      <div v-else-if="viewMode === 'cover'" class="books-grid">
+        <article
           v-for="book in books"
           :key="book.id"
-          class="book-card"
+          class="book-item"
           @click="$router.push(`/book/${book.id}`)"
         >
-          <BookCover :src="book.coverImage" :title="book.title" height="150px" />
+          <div class="cover-wrap">
+            <BookCover :src="book.coverImage" :title="book.title" height="170px" />
+          </div>
           <div class="book-info">
             <h4 class="book-title">{{ book.title }}</h4>
             <p class="book-author">{{ book.author }}</p>
             <div class="book-meta-row">
               <span class="current-price">¥{{ book.price }}</span>
-              <span class="book-stock">库存 {{ book.stock }}</span>
+              <span class="book-stock">余 {{ book.stock }}</span>
             </div>
+          </div>
+        </article>
+      </div>
+
+      <div v-else class="books-text-list">
+        <div
+          v-for="book in books"
+          :key="book.id"
+          class="book-text-row"
+          @click="$router.push(`/book/${book.id}`)"
+        >
+          <div class="text-main">
+            <h4 class="book-title">{{ book.title }}</h4>
+            <p class="book-sub">
+              <span>{{ book.author }}</span>
+              <span v-if="book.publisher"> · {{ book.publisher }}</span>
+            </p>
+          </div>
+          <div class="text-side">
+            <span class="current-price">¥{{ book.price }}</span>
+            <span class="book-stock">余 {{ book.stock }}</span>
           </div>
         </div>
       </div>
@@ -72,7 +98,6 @@
 
     <div class="pagination-section">
       <el-pagination
-        small
         background
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
@@ -87,35 +112,28 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { getBooksApi } from '@/api/book'
 import { getCategoriesApi } from '@/api/category'
-import { getStatsApi } from '@/api/stats'
 import BookCover from '@/components/BookCover.vue'
+
+const VIEW_MODE_KEY = 'books_view_mode'
 
 const searchKeyword = ref('')
 const selectedCategory = ref('')
 const sortBy = ref('newest')
+const viewMode = ref(localStorage.getItem(VIEW_MODE_KEY) === 'text' ? 'text' : 'cover')
 const currentPage = ref(1)
 const pageSize = ref(24)
 const total = ref(0)
 const books = ref([])
 const categories = ref([])
 const loading = ref(false)
-const stats = ref({
-  bookCount: 0,
-  onSaleBookCount: 0,
-  soldCount: 0,
-  categoryCount: 0,
-  userCount: 0
-})
 
-const statItems = computed(() => [
-  { label: '在售图书', value: stats.value.onSaleBookCount || stats.value.bookCount || 0 },
-  { label: '累计卖出', value: stats.value.soldCount || 0 },
-  { label: '图书分类', value: stats.value.categoryCount || 0 }
-])
+watch(viewMode, (mode) => {
+  localStorage.setItem(VIEW_MODE_KEY, mode)
+})
 
 const fetchBooks = async () => {
   loading.value = true
@@ -151,17 +169,6 @@ const fetchCategories = async () => {
   }
 }
 
-const fetchStats = async () => {
-  try {
-    const response = await getStatsApi()
-    if (response.code === 200) {
-      stats.value = { ...stats.value, ...response.data }
-    }
-  } catch (error) {
-    console.error('获取统计失败:', error)
-  }
-}
-
 const handleSearch = () => {
   currentPage.value = 1
   fetchBooks()
@@ -190,7 +197,6 @@ const handleCurrentChange = (page) => {
 }
 
 onMounted(() => {
-  fetchStats()
   fetchCategories()
   fetchBooks()
 })
@@ -198,119 +204,131 @@ onMounted(() => {
 
 <style scoped>
 .books-page {
-  max-width: 1280px;
-  margin: 0 auto;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-.stats-banner {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 12px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: linear-gradient(90deg, #1f2a37 0%, #2f4b6e 100%);
-  color: #fff;
+.intro {
+  margin-bottom: 20px;
 }
 
-.stat-item {
-  text-align: center;
-  min-width: 0;
+.intro h2 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.35;
+  color: var(--ink);
 }
 
-.stat-item strong {
-  display: block;
-  font-size: 20px;
-  line-height: 1.2;
-}
-
-.stat-item span {
-  font-size: 12px;
-  opacity: 0.85;
+.desc {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--muted);
 }
 
 .toolbar {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 
 .search-input {
   flex: 1;
   max-width: 420px;
+  min-width: 220px;
+}
+
+.view-mode {
+  margin-left: auto;
 }
 
 .category-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 12px;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
 }
 
 .category-chip {
-  border: 1px solid #dcdfe6;
-  background: #fff;
-  color: #606266;
-  border-radius: 999px;
-  padding: 4px 10px;
-  font-size: 12px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-soft);
+  border-radius: var(--radius-sm);
+  padding: 5px 11px;
+  font-size: 13px;
   line-height: 1.4;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .category-chip:hover {
-  border-color: #409eff;
-  color: #409eff;
+  border-color: var(--accent-line);
+  color: var(--accent-deep);
+  background: var(--accent-soft);
 }
 
-.category-chip.active {
-  background: #409eff;
-  border-color: #409eff;
+.category-chip.active,
+.category-chip.active:hover {
+  background: var(--accent);
+  border-color: var(--accent);
   color: #fff;
+  font-weight: 600;
 }
 
 .books-list {
+  flex: 1;
   min-height: 240px;
 }
 
 .books-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
 }
 
-.book-card {
-  background: #fff;
-  border: 1px solid #ebeef5;
+.book-item {
+  cursor: pointer;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
-  cursor: pointer;
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.book-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+.cover-wrap {
+  overflow: hidden;
+  background: #e2e6eb;
+}
+
+.book-item:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
 }
 
 .book-info {
-  padding: 8px;
+  padding: 12px;
 }
 
 .book-title {
   margin: 0 0 4px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
+  color: var(--ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .book-author {
-  margin: 0 0 6px;
+  margin: 0 0 8px;
   font-size: 12px;
-  color: #909399;
+  color: var(--muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -324,20 +342,76 @@ onMounted(() => {
 }
 
 .current-price {
-  font-size: 14px;
-  color: #f56c6c;
+  font-size: 15px;
+  color: var(--price);
   font-weight: 700;
 }
 
 .book-stock {
   font-size: 11px;
-  color: #67c23a;
+  color: var(--muted);
+}
+
+.books-text-list {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.book-text-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.2s;
+}
+
+.book-text-row:last-child {
+  border-bottom: none;
+}
+
+.book-text-row:hover {
+  background: var(--accent-soft);
+}
+
+.text-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.text-main .book-title {
+  margin-bottom: 4px;
+  font-size: 15px;
+}
+
+.book-sub {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
 }
 
 .pagination-section {
   display: flex;
   justify-content: center;
-  margin-top: 14px;
+  margin-top: auto;
+  padding-top: 22px;
 }
 
 @media (max-width: 1100px) {
@@ -346,22 +420,19 @@ onMounted(() => {
   }
 }
 
-@media (max-width: 768px) {
-  .stats-banner {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
+@media (max-width: 800px) {
   .books-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .toolbar {
-    flex-wrap: wrap;
+    gap: 12px;
   }
 
   .search-input {
     max-width: none;
     width: 100%;
+  }
+
+  .view-mode {
+    margin-left: 0;
   }
 }
 </style>

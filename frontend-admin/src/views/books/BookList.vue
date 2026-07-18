@@ -18,6 +18,17 @@
 
       <el-table :data="list" v-loading="loading" stripe>
         <el-table-column prop="id" label="ID" width="70" />
+        <el-table-column label="封面" width="80">
+          <template #default="{ row }">
+            <el-image
+              v-if="row.coverImage"
+              :src="row.coverImage"
+              fit="cover"
+              class="table-cover"
+            />
+            <span v-else class="cover-empty">无</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="title" label="书名" min-width="160" />
         <el-table-column prop="author" label="作者" width="120" />
         <el-table-column prop="price" label="售价" width="90" />
@@ -79,8 +90,26 @@
         <el-form-item label="库存" required>
           <el-input-number v-model="form.stock" :min="0" style="width: 100%" />
         </el-form-item>
-        <el-form-item label="封面 URL">
-          <el-input v-model="form.coverImage" />
+        <el-form-item label="封面">
+          <div class="cover-field">
+            <el-upload
+              class="cover-uploader"
+              :show-file-list="false"
+              accept="image/jpeg,image/png,image/gif,image/webp,image/bmp"
+              :http-request="handleUpload"
+              :disabled="uploading"
+            >
+              <img v-if="form.coverImage" :src="form.coverImage" class="cover-preview" alt="封面预览" />
+              <div v-else class="cover-placeholder">
+                <el-icon class="cover-uploader-icon"><Plus /></el-icon>
+                <span>{{ uploading ? '上传中...' : '上传封面' }}</span>
+              </div>
+            </el-upload>
+            <div class="cover-actions">
+              <el-button v-if="form.coverImage" link type="danger" @click="form.coverImage = ''">移除</el-button>
+              <p class="tip">支持 jpg / png / gif / webp，最大 5MB</p>
+            </div>
+          </div>
         </el-form-item>
         <el-form-item label="状态">
           <el-radio-group v-model="form.status">
@@ -105,9 +134,11 @@ import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { createBookApi, deleteBookApi, getAdminBooksApi, updateBookApi } from '@/api/book'
 import { getAdminCategoriesApi } from '@/api/category'
+import { uploadImageApi } from '@/api/upload'
 
 const loading = ref(false)
 const saving = ref(false)
+const uploading = ref(false)
 const dialogVisible = ref(false)
 const list = ref([])
 const total = ref(0)
@@ -181,6 +212,25 @@ const openDialog = (row) => {
   dialogVisible.value = true
 }
 
+const handleUpload = async ({ file }) => {
+  if (!file.type?.startsWith('image/')) {
+    ElMessage.warning('请上传图片文件')
+    return
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    ElMessage.warning('图片大小不能超过 5MB')
+    return
+  }
+  uploading.value = true
+  try {
+    const res = await uploadImageApi(file)
+    form.coverImage = res.data
+    ElMessage.success('封面上传成功')
+  } finally {
+    uploading.value = false
+  }
+}
+
 const handleSave = async () => {
   if (!form.title || !form.author || !form.categoryId) {
     ElMessage.warning('请填写书名、作者和分类')
@@ -244,5 +294,67 @@ onMounted(async () => {
   display: flex;
   justify-content: flex-end;
   margin-top: 16px;
+}
+
+.table-cover {
+  width: 40px;
+  height: 52px;
+  border-radius: 4px;
+}
+
+.cover-empty {
+  color: #909399;
+  font-size: 12px;
+}
+
+.cover-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.cover-uploader :deep(.el-upload) {
+  border: 1px dashed #dcdfe6;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.cover-uploader :deep(.el-upload:hover) {
+  border-color: #409eff;
+}
+
+.cover-preview,
+.cover-placeholder {
+  width: 120px;
+  height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  object-fit: cover;
+  background: #f5f7fa;
+  color: #909399;
+  font-size: 13px;
+}
+
+.cover-uploader-icon {
+  font-size: 24px;
+}
+
+.cover-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 4px;
+}
+
+.tip {
+  margin: 0;
+  color: #909399;
+  font-size: 12px;
+  line-height: 1.5;
 }
 </style>

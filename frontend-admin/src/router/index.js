@@ -43,6 +43,12 @@ const routes = [
         name: 'Orders',
         component: () => import('@/views/orders/OrderList.vue'),
         meta: { title: '订单管理', requiresAuth: true }
+      },
+      {
+        path: 'settings',
+        name: 'ShopSettings',
+        component: () => import('@/views/settings/ShopSettings.vue'),
+        meta: { title: '店铺设置', requiresAuth: true }
       }
     ]
   },
@@ -60,7 +66,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
   if (to.meta.title) {
-    document.title = `${to.meta.title} - 管理后台`
+    document.title = `${to.meta.title} - 易三定二手图书商店管理后台`
   }
 
   if (to.meta.requiresAuth && (!userStore.isLoggedIn || !userStore.isAdmin)) {

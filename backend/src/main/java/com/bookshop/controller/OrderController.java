@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bookshop.common.PageResult;
 import com.bookshop.common.Result;
+import com.bookshop.dto.OrderCreateRequest;
 import com.bookshop.entity.Order;
 import com.bookshop.entity.OrderItem;
 import com.bookshop.mapper.OrderItemMapper;
 import com.bookshop.mapper.OrderMapper;
+import com.bookshop.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +27,27 @@ public class OrderController {
 
     @Autowired
     private OrderItemMapper orderItemMapper;
+
+    @Autowired
+    private OrderService orderService;
+
+    @PostMapping({"/order/create", "/api/order/create"})
+    public Result<Map<String, Object>> createOrder(@RequestBody OrderCreateRequest request) {
+        try {
+            return Result.success("下单成功，请联系店家完成线下付款", orderService.createOrder(request));
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    @GetMapping({"/order/{id}", "/api/order/{id}"})
+    public Result<Map<String, Object>> getUserOrderDetail(@PathVariable Long id) {
+        try {
+            return Result.success(orderService.getOrderDetail(id));
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
+    }
 
     @GetMapping({"/admin/orders", "/api/admin/orders"})
     public Result<PageResult<Order>> listOrders(@RequestParam(defaultValue = "1") int page,
@@ -59,6 +82,22 @@ public class OrderController {
         return Result.success(data);
     }
 
+    @PutMapping({"/admin/order/{id}/confirm-pay", "/api/admin/order/{id}/confirm-pay"})
+    public Result<Order> confirmPay(@PathVariable Long id) {
+        Order order = orderMapper.selectById(id);
+        if (order == null) {
+            return Result.error("订单不存在");
+        }
+        if (order.getStatus() == null || order.getStatus() != 0) {
+            return Result.error("仅待付款订单可确认收款");
+        }
+        order.setStatus(1);
+        order.setPayType(1);
+        order.setPayTime(LocalDateTime.now());
+        orderMapper.updateById(order);
+        return Result.success(order);
+    }
+
     @PutMapping({"/admin/order/{id}/ship", "/api/admin/order/{id}/ship"})
     public Result<Order> shipOrder(@PathVariable Long id) {
         Order order = orderMapper.selectById(id);
@@ -66,7 +105,7 @@ public class OrderController {
             return Result.error("订单不存在");
         }
         if (order.getStatus() == null || order.getStatus() != 1) {
-            return Result.error("仅已支付订单可发货");
+            return Result.error("仅已确认收款订单可发货");
         }
         order.setStatus(2);
         order.setShipTime(LocalDateTime.now());

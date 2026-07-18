@@ -24,9 +24,10 @@
         <el-table-column prop="receiverName" label="收货人" width="100" />
         <el-table-column prop="receiverPhone" label="电话" width="120" />
         <el-table-column prop="createTime" label="创建时间" min-width="170" />
-        <el-table-column label="操作" width="240" fixed="right">
+        <el-table-column label="操作" width="300" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="openDetail(row)">详情</el-button>
+            <el-button link :disabled="row.status !== 0" @click="handleConfirmPay(row)">确认收款</el-button>
             <el-button link :disabled="row.status !== 1" @click="handleShip(row)">发货</el-button>
             <el-button link :disabled="row.status !== 2" @click="handleComplete(row)">完成</el-button>
             <el-button link type="danger" :disabled="row.status >= 3" @click="handleCancel(row)">取消</el-button>
@@ -75,6 +76,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   cancelOrderApi,
   completeOrderApi,
+  confirmPayApi,
   getAdminOrdersApi,
   getOrderDetailApi,
   shipOrderApi
@@ -94,8 +96,8 @@ const query = reactive({
 })
 
 const statusOptions = [
-  { label: '待支付', value: 0 },
-  { label: '已支付', value: 1 },
+  { label: '待线下付款', value: 0 },
+  { label: '已收款', value: 1 },
   { label: '已发货', value: 2 },
   { label: '已完成', value: 3 },
   { label: '已取消', value: 4 }
@@ -118,6 +120,13 @@ const openDetail = async (row) => {
   const res = await getOrderDetailApi(row.id)
   detail.value = res.data
   detailVisible.value = true
+}
+
+const handleConfirmPay = async (row) => {
+  await ElMessageBox.confirm('确认已线下收到该订单款项？', '提示')
+  await confirmPayApi(row.id)
+  ElMessage.success('已确认收款')
+  loadData()
 }
 
 const handleShip = async (row) => {

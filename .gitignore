@@ -8,6 +8,10 @@ backend/target/
 frontend-user/dist/
 frontend-admin/dist/
 
+# Uploaded files
+backend/uploads/
+uploads/
+
 # Logs & local env
 *.log
 .env

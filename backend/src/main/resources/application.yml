@@ -12,10 +12,20 @@ spring:
     username: root
     password: 123456
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
+
   # Jackson配置
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+
+# 本地上传目录（相对进程工作目录）
+bookshop:
+  upload:
+    dir: uploads
 
 # MyBatis Plus配置
 mybatis-plus:
@@ -32,5 +42,5 @@ mybatis-plus:
 # 日志配置
 logging:
   level:
-    com.usedbook: debug
+    com.bookshop: debug
     org.springframework.security: debug

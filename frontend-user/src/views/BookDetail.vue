@@ -1,45 +1,37 @@
 <template>
-  <div class="book-detail" v-loading="loading">
+  <div class="book-detail page-enter" v-loading="loading">
     <div class="detail-container" v-if="book">
-      <!-- 图书基本信息 -->
       <div class="book-basic-info">
         <div class="book-cover-section">
-          <BookCover :src="book.coverImage" :title="book.title" height="360px" />
+          <BookCover :src="book.coverImage" :title="book.title" height="380px" />
         </div>
-        
+
         <div class="book-info-section">
+          <p class="eyebrow">易三定二手图书商店</p>
           <h1 class="book-title">{{ book.title }}</h1>
           <div class="book-meta">
-            <span class="author">作者：{{ book.author }}</span>
-            <span class="publisher">出版社：{{ book.publisher }}</span>
-            <span class="publish-date">出版日期：{{ book.publishDate }}</span>
-            <span class="isbn">ISBN：{{ book.isbn }}</span>
+            <span>作者 {{ book.author }}</span>
+            <span v-if="book.publisher">出版社 {{ book.publisher }}</span>
+            <span v-if="book.publishDate">出版 {{ book.publishDate }}</span>
+            <span v-if="book.isbn">ISBN {{ book.isbn }}</span>
           </div>
-          
+
           <div class="price-section">
             <div class="current-price">
-              <span class="price-label">现价：</span>
+              <span class="price-label">现价</span>
               <span class="price-value">¥{{ book.price }}</span>
             </div>
-            <div class="original-price">
-              <span class="price-label">原价：</span>
-              <span class="price-value">¥{{ book.originalPrice }}</span>
-            </div>
-            <div class="discount">
-              <el-tag type="success">
-                节省 {{ calculateDiscount(book.originalPrice, book.price) }}%
-              </el-tag>
+            <div class="original-price" v-if="book.originalPrice">
+              原价 ¥{{ book.originalPrice }}
+              <span class="save">约省 {{ calculateDiscount(book.originalPrice, book.price) }}%</span>
             </div>
           </div>
-          
+
           <div class="stock-section">
-            <span class="stock-label">库存：</span>
-            <span class="stock-value" :class="{ 'low-stock': book.stock < 5 }">
-              {{ book.stock }}本
-            </span>
-            <el-tag v-if="book.stock < 5" type="warning" size="small">库存紧张</el-tag>
+            <span>库存 {{ book.stock }} 本</span>
+            <span v-if="book.stock < 5" class="low-stock">库存紧张</span>
           </div>
-          
+
           <div class="action-section">
             <el-input-number
               v-model="quantity"
@@ -53,84 +45,31 @@
               size="large"
               :disabled="book.stock === 0"
               @click="addToCart"
-              class="add-cart-btn"
             >
               <el-icon><ShoppingCart /></el-icon>
               加入购物车
             </el-button>
             <el-button
-              type="success"
               size="large"
+              plain
               :disabled="book.stock === 0"
               @click="buyNow"
-              class="buy-now-btn"
             >
               立即购买
             </el-button>
           </div>
-          
-          <div class="seller-info">
-            <h3>卖家信息</h3>
-            <p>卖家：{{ book.sellerName || '平台自营' }}</p>
-            <p>信誉：⭐⭐⭐⭐⭐</p>
+
+          <div class="trust-note">
+            <p>面向高中生与家长：提交订单后联系店家线下付款，可电话或扫码加微信确认品相与发货。</p>
           </div>
         </div>
       </div>
-      
-      <!-- 图书描述 -->
+
       <div class="book-description">
-        <h2>图书描述</h2>
+        <h2>内容简介</h2>
         <div class="description-content">
           {{ book.description || '暂无描述信息' }}
         </div>
-      </div>
-      
-      <!-- 用户评价 -->
-      <div class="book-reviews">
-        <h2>用户评价</h2>
-        <div class="review-stats">
-          <div class="rating-overview">
-            <span class="average-rating">综合评分：4.8</span>
-            <el-rate v-model="averageRating" disabled show-score />
-          </div>
-          <div class="rating-distribution">
-            <div class="rating-item" v-for="rating in ratingDistribution" :key="rating.stars">
-              <span>{{ rating.stars }}星</span>
-              <el-progress :percentage="rating.percentage" :show-text="false" />
-              <span>{{ rating.count }}人</span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="review-list">
-          <div class="review-item" v-for="review in reviews" :key="review.id">
-            <div class="review-header">
-              <span class="reviewer">{{ review.reviewer }}</span>
-              <el-rate v-model="review.rating" disabled size="small" />
-              <span class="review-time">{{ formatTime(review.createTime) }}</span>
-            </div>
-            <div class="review-content">
-              {{ review.content }}
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- 相关推荐 -->
-      <div class="related-books">
-        <h2>相关推荐</h2>
-        <el-row :gutter="20">
-          <el-col :span="6" v-for="relatedBook in relatedBooks" :key="relatedBook.id">
-            <el-card class="related-book-card" shadow="hover" @click="$router.push(`/book/${relatedBook.id}`)">
-              <BookCover :src="relatedBook.coverImage" :title="relatedBook.title" />
-              <div class="book-info">
-                <h4 class="book-title">{{ relatedBook.title }}</h4>
-                <p class="book-author">{{ relatedBook.author }}</p>
-                <p class="book-price">¥{{ relatedBook.price }}</p>
-              </div>
-            </el-card>
-          </el-col>
-        </el-row>
       </div>
     </div>
     
@@ -151,105 +90,33 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ShoppingCart } from '@element-plus/icons-vue'
 import { useBookStore } from '@/stores/book'
-import { useUserStore } from '@/stores/user'
+import { useCartStore } from '@/stores/cart'
 import BookCover from '@/components/BookCover.vue'
 
 const route = useRoute()
 const router = useRouter()
 const bookStore = useBookStore()
-const userStore = useUserStore()
+const cartStore = useCartStore()
 
 const book = ref(null)
 const quantity = ref(1)
 const loading = ref(false)
-const averageRating = ref(4.8)
 
-// 模拟评价数据
-const ratingDistribution = ref([
-  { stars: 5, percentage: 80, count: 160 },
-  { stars: 4, percentage: 15, count: 30 },
-  { stars: 3, percentage: 3, count: 6 },
-  { stars: 2, percentage: 1, count: 2 },
-  { stars: 1, percentage: 1, count: 2 }
-])
-
-const reviews = ref([
-  {
-    id: 1,
-    reviewer: '读书爱好者',
-    rating: 5,
-    content: '书的质量很好，价格实惠，发货速度快，非常满意！',
-    createTime: '2024-01-15'
-  },
-  {
-    id: 2,
-    reviewer: '文学迷',
-    rating: 5,
-    content: '正版图书，内容完整，品相很新，值得购买。',
-    createTime: '2024-01-10'
-  }
-])
-
-const relatedBooks = ref([
-  {
-    id: 2,
-    title: '三体Ⅱ：黑暗森林',
-    author: '刘慈欣',
-    price: 28.00,
-    coverImage: '/default-book.jpg'
-  },
-  {
-    id: 3,
-    title: '三体Ⅲ：死神永生',
-    author: '刘慈欣',
-    price: 32.00,
-    coverImage: '/default-book.jpg'
-  }
-])
-
-// 计算折扣
 const calculateDiscount = (originalPrice, currentPrice) => {
   if (!originalPrice || !currentPrice) return 0
   return Math.round((1 - currentPrice / originalPrice) * 100)
 }
 
-// 格式化时间
-const formatTime = (timeStr) => {
-  return new Date(timeStr).toLocaleDateString()
+const addToCart = () => {
+  if (!book.value || book.value.stock === 0) return
+  cartStore.addItem(book.value, quantity.value)
+  ElMessage.success('已加入购物车')
 }
 
-// 添加到购物车
-const addToCart = async () => {
-  if (!userStore.isLoggedIn) {
-    ElMessage.warning('请先登录')
-    router.push('/login')
-    return
-  }
-  
-  try {
-    await bookStore.addToCart(book.value.id, quantity.value)
-    ElMessage.success('已添加到购物车')
-  } catch (error) {
-    ElMessage.error('添加到购物车失败')
-  }
-}
-
-// 立即购买
-const buyNow = async () => {
-  if (!userStore.isLoggedIn) {
-    ElMessage.warning('请先登录')
-    router.push('/login')
-    return
-  }
-  
-  // 跳转到确认订单页面
-  router.push({
-    path: '/order/confirm',
-    query: {
-      bookId: book.value.id,
-      quantity: quantity.value
-    }
-  })
+const buyNow = () => {
+  if (!book.value || book.value.stock === 0) return
+  cartStore.setCheckoutItems([{ bookId: book.value.id, quantity: quantity.value }])
+  router.push('/checkout')
 }
 
 // 获取图书详情
@@ -279,203 +146,156 @@ onMounted(() => {
 
 <style scoped>
 .book-detail {
-  max-width: 1200px;
+  max-width: 980px;
   margin: 0 auto;
-  padding: 20px;
 }
 
 .detail-container {
-  background: white;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 30px;
+  padding: 28px;
 }
 
 .book-basic-info {
   display: flex;
-  gap: 40px;
-  margin-bottom: 40px;
+  gap: 36px;
+  margin-bottom: 28px;
 }
 
 .book-cover-section {
-  flex: 0 0 300px;
-}
-
-.book-cover {
-  width: 100%;
-  height: 400px;
+  flex: 0 0 280px;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  border: 1px solid var(--border);
 }
 
 .book-info-section {
   flex: 1;
 }
 
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .book-title {
-  font-size: 28px;
-  color: #333;
-  margin-bottom: 20px;
+  font-size: clamp(24px, 3vw, 32px);
+  color: var(--ink);
+  margin: 0 0 16px;
+  line-height: 1.3;
 }
 
 .book-meta {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 20px;
-  color: #666;
+  gap: 6px;
+  margin-bottom: 18px;
+  color: var(--ink-soft);
+  font-size: 14px;
 }
 
 .price-section {
-  margin-bottom: 20px;
-  padding: 20px;
-  background: #f8f9fa;
+  margin-bottom: 16px;
+  padding: 16px 18px;
+  background: var(--surface-raised);
   border-radius: 8px;
+  border: 1px solid var(--border);
 }
 
 .current-price {
-  font-size: 24px;
-  color: #f56c6c;
-  font-weight: bold;
-  margin-bottom: 10px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.price-label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.price-value {
+  font-size: 28px;
+  color: var(--price);
+  font-weight: 700;
 }
 
 .original-price {
-  font-size: 16px;
-  color: #999;
-  text-decoration: line-through;
-  margin-bottom: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.save {
+  margin-left: 8px;
+  color: var(--accent-deep);
 }
 
 .stock-section {
-  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 18px;
+  color: var(--ink-soft);
+  font-size: 14px;
 }
 
-.stock-value.low-stock {
-  color: #e6a23c;
-  font-weight: bold;
+.low-stock {
+  color: #b7791f;
+  font-weight: 600;
 }
 
 .action-section {
   display: flex;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 30px;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
 }
 
-.add-cart-btn,
-.buy-now-btn {
-  height: 40px;
-  font-size: 16px;
-}
-
-.seller-info {
-  padding: 20px;
-  background: #f0f2f5;
+.trust-note {
+  padding: 14px 16px;
   border-radius: 8px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
 }
 
-.book-description,
-.book-reviews,
-.related-books {
-  margin-bottom: 40px;
+.trust-note p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.book-description h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  color: var(--ink);
 }
 
 .description-content {
-  line-height: 1.6;
-  color: #666;
-}
-
-.review-stats {
-  display: flex;
-  gap: 40px;
-  margin-bottom: 20px;
-}
-
-.rating-overview {
-  text-align: center;
-}
-
-.average-rating {
-  display: block;
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.rating-distribution {
-  flex: 1;
-}
-
-.rating-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.review-item {
-  padding: 15px;
-  border-bottom: 1px solid #eee;
-}
-
-.review-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.reviewer {
-  font-weight: bold;
-}
-
-.review-time {
-  color: #999;
-  font-size: 12px;
-}
-
-.review-content {
-  color: #666;
-  line-height: 1.5;
-}
-
-.related-book-card {
-  cursor: pointer;
-  transition: transform 0.3s;
-}
-
-.related-book-card:hover {
-  transform: translateY(-3px);
-}
-
-.related-book-card .book-cover img {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-}
-
-.related-book-card .book-info {
-  padding: 10px 0;
-}
-
-.related-book-card .book-title {
+  line-height: 1.8;
+  color: var(--ink-soft);
   font-size: 14px;
-  margin-bottom: 5px;
-}
-
-.related-book-card .book-author {
-  font-size: 12px;
-  color: #666;
-}
-
-.related-book-card .book-price {
-  font-size: 16px;
-  color: #f56c6c;
-  font-weight: bold;
 }
 
 .book-not-found {
   text-align: center;
-  padding: 100px 0;
+  padding: 80px 0;
+}
+
+@media (max-width: 768px) {
+  .book-basic-info {
+    flex-direction: column;
+  }
+
+  .book-cover-section {
+    flex: none;
+    width: min(260px, 100%);
+    margin: 0 auto;
+  }
 }
 </style>

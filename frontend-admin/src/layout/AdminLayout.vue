@@ -2,10 +2,10 @@
   <el-container class="admin-layout">
     <el-aside width="220px" class="sidebar">
       <div class="brand">
-        <span class="brand-mark">书</span>
+        <span class="brand-mark">易</span>
         <div>
-          <strong>Book Shop</strong>
-          <p>管理后台</p>
+          <strong>易三定</strong>
+          <p>二手图书商店 · 后台</p>
         </div>
       </div>
       <el-menu
@@ -34,6 +34,10 @@
         <el-menu-item index="/orders">
           <el-icon><List /></el-icon>
           <span>订单管理</span>
+        </el-menu-item>
+        <el-menu-item index="/settings">
+          <el-icon><Setting /></el-icon>
+          <span>店铺设置</span>
         </el-menu-item>
       </el-menu>
     </el-aside>

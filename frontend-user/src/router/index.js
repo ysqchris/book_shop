@@ -34,13 +34,25 @@ const routes = [
     path: '/cart',
     name: 'Cart',
     component: () => import('@/views/Cart.vue'),
-    meta: { title: '购物车', requiresAuth: true }
+    meta: { title: '购物车' }
+  },
+  {
+    path: '/checkout',
+    name: 'Checkout',
+    component: () => import('@/views/Checkout.vue'),
+    meta: { title: '确认订单' }
+  },
+  {
+    path: '/order/success/:id',
+    name: 'OrderSuccess',
+    component: () => import('@/views/OrderSuccess.vue'),
+    meta: { title: '下单成功' }
   },
   {
     path: '/orders',
     name: 'Orders',
     component: () => import('@/views/Orders.vue'),
-    meta: { title: '我的订单', requiresAuth: true }
+    meta: { title: '我的订单' }
   },
   {
     path: '/profile',
@@ -69,7 +81,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.title) {
-    document.title = `${to.meta.title} - 二手书平台`
+    document.title = `${to.meta.title} - 易三定二手图书商店`
   }
 
   if (to.meta.requiresAuth && !userStore.isLoggedIn) {

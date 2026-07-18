@@ -15,6 +15,10 @@ request.interceptors.request.use((config) => {
   if (userStore.token) {
     config.headers.Authorization = `Bearer ${userStore.token}`
   }
+  // FormData 需由浏览器自动带 boundary，不能强制 application/json
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type']
+  }
   return config
 })
 
